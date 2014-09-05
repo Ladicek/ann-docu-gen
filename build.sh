@@ -2,8 +2,7 @@
 
 ROOT=$(dirname $(readlink -f $0))
 
-echo "clean"
-find $ROOT -type d -name target | xargs rm -rf
+$ROOT/clean.sh
 
 echo "compile 'framework'"
 cd $ROOT/framework
@@ -13,10 +12,11 @@ javac -d target src/cz/ladicek/annDocuGen/api/*.java
 echo "compile 'annotation-processor'"
 cd $ROOT/annotation-processor
 mkdir target
-javac -d target -cp $ROOT/framework/target/ src/cz/ladicek/annDocuGen/annotationProcessor/*.java
+$ROOT/build-antlr.sh
+javac -d target -cp $ROOT/lib/antlr-runtime-4.4.jar:$ROOT/framework/target/ src/cz/ladicek/annDocuGen/annotationProcessor/*.java src/cz/ladicek/annDocuGen/annotationProcessor/javaParser/*.java
 cp -a resources/* target
 
 echo "compile 'example'"
 cd $ROOT/example
 mkdir target
-javac -d target -cp $ROOT/framework/target/:$ROOT/annotation-processor/target/ src/cz/ladicek/annDocuGen/example/*.java
+javac -d target -cp $ROOT/lib/antlr-runtime-4.4.jar:$ROOT/framework/target/:$ROOT/annotation-processor/target/ src/cz/ladicek/annDocuGen/example/*.java

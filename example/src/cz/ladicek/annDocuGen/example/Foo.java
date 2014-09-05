@@ -12,8 +12,4 @@ public class Foo {
     /** Depends on Bar */
     @Inject
     private Bar bar;
-
-    public void doSomething() {
-        bar.doSomething(foo);
-    }
 }

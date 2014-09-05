@@ -10,6 +10,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Set;
+
+import static cz.ladicek.annDocuGen.annotationProcessor.Utils.declaringClassOf;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes("cz.ladicek.annDocuGen.api.Inject")
@@ -37,36 +40,57 @@ public class AnnDocuGen extends AbstractProcessor {
             return true;
         }
 
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for " + roundEnv.getRootElements());
+        Documentation doc = new Documentation(processingEnv);
 
-        Documentation doc = new Documentation();
-
-        for (Element annotated : roundEnv.getElementsAnnotatedWith(Inject.class)) {
-            Element clazz = declaringClassOf(annotated);
-            DocumentedType type = doc.documentedType(clazz, processingEnv.getElementUtils().getDocComment(clazz));
-
-            if (annotated.getAnnotation(Property.class) != null) {
-                String propertyName = annotated.getAnnotation(Property.class).value();
-                String propertyClassName = annotated.asType().toString();
-                String javadoc = processingEnv.getElementUtils().getDocComment(annotated);
-
-                DocumentedProperty property = new DocumentedProperty(propertyName, propertyClassName, javadoc);
-                type.addProperty(property);
-            } else {
-                String dependencyClassName = annotated.asType().toString();
-                String javadoc = processingEnv.getElementUtils().getDocComment(annotated);
-
-                DocumentedDependency dependency = new DocumentedDependency(dependencyClassName, javadoc);
-                type.addDependency(dependency);
-            }
-        }
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for "
+                + roundEnv.getRootElements());
+        collectDocumentation(roundEnv, doc);
 
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Documentation collected, generating files");
+        generateDocumentationFiles(doc);
 
+        return true;
+    }
+
+    private void collectDocumentation(RoundEnvironment roundEnv, Documentation doc) {
+        for (Element annotated : roundEnv.getElementsAnnotatedWith(Inject.class)) {
+            Element clazz = declaringClassOf(annotated);
+            DocumentedClass type = doc.documentClass(clazz);
+
+            if (annotated.getAnnotation(Property.class) != null) {
+                if (annotated.getKind() != ElementKind.FIELD) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                            "@Inject @Property is only supported for fields", annotated);
+                    continue;
+                }
+
+                type.addProperty(doc.documentPropertyField(annotated));
+            } else {
+                if (annotated.getKind() != ElementKind.CONSTRUCTOR && annotated.getKind() != ElementKind.FIELD) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                            "@Inject is only supported for fields and constructors", annotated);
+                    continue;
+                }
+
+                switch (annotated.getKind()) {
+                    case FIELD:
+                        type.addDependency(doc.documentDependencyField(annotated));
+                        break;
+                    case CONSTRUCTOR:
+                        for (Element param : ((ExecutableElement) annotated).getParameters()) {
+                            type.addDependency(doc.documentDependencyConstructorParam(param));
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    private void generateDocumentationFiles(Documentation doc) {
         try {
-            for (DocumentedType type : doc.allDocumentedTypes()) {
+            for (DocumentedClass type : doc.allDocumentedClasses()) {
                 FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                        type.clazz.toString() + ".md");
+                        type.fullName + ".md");
                 Writer writer = file.openWriter();
                 try {
                     PrintWriter printWriter = new PrintWriter(writer);
@@ -79,15 +103,5 @@ public class AnnDocuGen extends AbstractProcessor {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "IO problem: " + e);
             throw new RuntimeException(e);
         }
-
-        return true;
-    }
-
-    private Element declaringClassOf(Element annotated) {
-        Element clazz = annotated;
-        while (clazz != null && clazz.getKind() != ElementKind.CLASS) {
-            clazz = clazz.getEnclosingElement();
-        }
-        return clazz;
     }
 }

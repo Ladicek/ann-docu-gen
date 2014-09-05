@@ -1,18 +1,20 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
-import javax.lang.model.element.Element;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DocumentedType {
-    public final Element clazz;
+public final class DocumentedClass {
+    public final String simpleName;
+    public final String fullName;
     public final String javadoc;
+
     public final List<DocumentedProperty> properties = new ArrayList<DocumentedProperty>();
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
-    public DocumentedType(Element clazz, String javadoc) {
-        this.clazz = clazz;
+    public DocumentedClass(String simpleName, String fullName, String javadoc) {
+        this.simpleName = simpleName;
+        this.fullName = fullName;
         this.javadoc = javadoc;
     }
 
@@ -27,9 +29,9 @@ public final class DocumentedType {
     // ---
 
     public void writeDocumentation(PrintWriter out) {
-        out.println("# " + clazz.getSimpleName());
+        out.println("# " + simpleName);
         out.println();
-        out.println("`" + clazz.toString() + "`");
+        out.println("`" + fullName + "`");
         out.println();
         out.println(formatJavadoc(javadoc));
         out.println();
@@ -41,7 +43,14 @@ public final class DocumentedType {
             out.println();
         } else {
             for (DocumentedProperty property : properties) {
-                out.println("__" + property.propertyName + "__: `" + property.propertyClassName + "`");
+                out.print("__" + property.name + "__: `" + property.type + "`");
+                if (property.initializer != null) {
+                    out.print(" = `" + property.initializer + "`");
+                }
+                if (property.mandatory) {
+                    out.print(" __mandatory__");
+                }
+                out.println();
                 out.println();
                 out.println(formatJavadoc(property.javadoc));
                 out.println();
@@ -55,7 +64,7 @@ public final class DocumentedType {
             out.println();
         } else {
             for (DocumentedDependency dependency : dependencies) {
-                out.println("__`" + dependency.dependencyClassName + "`__");
+                out.println("__`" + dependency.type + "`__");
                 out.println();
                 out.println(formatJavadoc(dependency.javadoc));
                 out.println();
