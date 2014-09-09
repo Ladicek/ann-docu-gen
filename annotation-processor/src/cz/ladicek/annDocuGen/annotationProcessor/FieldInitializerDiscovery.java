@@ -17,12 +17,12 @@ public interface FieldInitializerDiscovery {
     public static final class Factory {
         public static FieldInitializerDiscovery create(ProcessingEnvironment processingEnv) {
             try {
-                Class.forName("com.sun.tools.javac.code.Symbol");
-                Class.forName("org.antlr.v4.runtime.Token");
-                return new JavaParserBasedFieldInitializerDiscovery(processingEnv);
-            } catch (Exception e) {
+                Class.forName("com.sun.source.util.Trees");
+                return new CompilerTreeApiBasedFieldInitializerDiscovery(processingEnv);
+            } catch (Throwable e) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-                        "Documentation is not going to contain property initializers");
+                        "Documentation is not going to contain property initializers"
+                                + " (this is only supported with Sun Java Compiler and tools.jar on the classpath)");
                 return VOID;
             }
         }

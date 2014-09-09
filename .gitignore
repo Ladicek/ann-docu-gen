@@ -2,6 +2,3 @@
 *.iml
 /out/
 target/
-/lib/
-/annotation-processor/src/cz/ladicek/annDocuGen/annotationProcessor/javaParser/*.java
-/annotation-processor/src/cz/ladicek/annDocuGen/annotationProcessor/javaParser/*.tokens

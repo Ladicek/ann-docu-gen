@@ -2,17 +2,15 @@
 
 ## Preparation
 
-One-time only: `./download.sh` (downloads ANTLR and ANTLR Runtime)
+Make sure you have an environment variable called `JAVA_HOME` defined
+and pointing to a root directory of a JDK installation
+(typically `/usr/lib/jvm/java-6-oracle/` or similar).
 
 ## Usage
 
-`./build.sh` (cleans everything and rebuilds everything)
-
-## Experimenting
-
 `./clean.sh` (cleans everything)
 
-`./build-antlr.sh` (makes sense after `clean.sh`, only builds the Java parser)
+`./build.sh` (cleans everything and rebuilds everything)
 
 ## Future
 
