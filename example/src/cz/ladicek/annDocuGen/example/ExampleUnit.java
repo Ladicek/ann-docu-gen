@@ -1,14 +1,19 @@
 package cz.ladicek.annDocuGen.example;
 
+import cz.ladicek.annDocuGen.api.EnvironmentVariables;
 import cz.ladicek.annDocuGen.api.Inject;
 import cz.ladicek.annDocuGen.api.Optional;
 import cz.ladicek.annDocuGen.api.Property;
+import cz.ladicek.annDocuGen.api.TheAnswer;
 import cz.ladicek.annDocuGen.api.Unit;
+
+import java.util.Map;
 
 /** Example unit */
 public class ExampleUnit implements Unit {
     /** Depends on Foo */
     @Inject
+    @TheAnswer(42)
     private Foo foo;
 
     /** A simple property */
@@ -40,7 +45,7 @@ public class ExampleUnit implements Unit {
     private Optional<String> myOptionalPropertyWithDefaultValue = Optional.of("default value");
 
     @Inject
-    public ExampleUnit(Baz baz) {
+    public ExampleUnit(Baz baz, @EnvironmentVariables Map<String, String> environment) {
     }
 
     @Override

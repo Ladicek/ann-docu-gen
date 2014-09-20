@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cz.ladicek.annDocuGen.annotationProcessor.Utils.qualifierAndScopeAnnotationsOf;
+
 public final class Documentation {
     private static final String OPTIONAL_TYPE_FQN = "cz.ladicek.annDocuGen.api.Optional";
 
@@ -30,7 +32,7 @@ public final class Documentation {
         DocumentedClass type = classes.get(fullName);
         if (type == null) {
             type = new DocumentedClass(clazz.getSimpleName().toString(), fullName,
-                    processingEnv.getElementUtils().getDocComment(clazz));
+                    qualifierAndScopeAnnotationsOf(clazz), processingEnv.getElementUtils().getDocComment(clazz));
             classes.put(fullName, type);
         }
         return type;
@@ -87,12 +89,14 @@ public final class Documentation {
 
     public DocumentedDependency documentDependencyField(Element annotatedField) {
         String className = annotatedField.asType().toString();
+        String annotations = qualifierAndScopeAnnotationsOf(annotatedField);
         String javadoc = processingEnv.getElementUtils().getDocComment(annotatedField);
-        return new DocumentedDependency(className, javadoc);
+        return new DocumentedDependency(className, annotations, javadoc);
     }
 
     public DocumentedDependency documentDependencyConstructorParam(Element ctorParam) {
         String className = ctorParam.asType().toString();
-        return new DocumentedDependency(className, null); // no javadoc for constructor parameters
+        String annotations = qualifierAndScopeAnnotationsOf(ctorParam);
+        return new DocumentedDependency(className, annotations, null); // no javadoc for constructor parameters
     }
 }

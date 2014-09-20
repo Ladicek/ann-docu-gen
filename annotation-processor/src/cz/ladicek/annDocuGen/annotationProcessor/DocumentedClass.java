@@ -7,14 +7,16 @@ import java.util.List;
 public final class DocumentedClass {
     public final String simpleName;
     public final String fullName;
+    public final String qualifierAndScopeAnnotations;
     public final String javadoc;
 
     public final List<DocumentedProperty> properties = new ArrayList<DocumentedProperty>();
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
-    public DocumentedClass(String simpleName, String fullName, String javadoc) {
+    public DocumentedClass(String simpleName, String fullName, String qualifierAndScopeAnnotations, String javadoc) {
         this.simpleName = simpleName;
         this.fullName = fullName;
+        this.qualifierAndScopeAnnotations = qualifierAndScopeAnnotations;
         this.javadoc = javadoc;
     }
 
@@ -31,7 +33,10 @@ public final class DocumentedClass {
     public void writeDocumentation(PrintWriter out) {
         out.println("# " + simpleName);
         out.println();
-        out.println("`" + fullName + "`");
+        if (qualifierAndScopeAnnotations != null) {
+            out.print("`" + qualifierAndScopeAnnotations + "` ");
+        }
+        out.println("__`" + fullName + "`__");
         out.println();
         out.println(formatJavadoc(javadoc));
         out.println();
@@ -64,6 +69,9 @@ public final class DocumentedClass {
             out.println();
         } else {
             for (DocumentedDependency dependency : dependencies) {
+                if (dependency.qualifierAndScopeAnnotations != null) {
+                    out.print("`" + dependency.qualifierAndScopeAnnotations + "` ");
+                }
                 out.println("__`" + dependency.type + "`__");
                 out.println();
                 out.println(formatJavadoc(dependency.javadoc));
