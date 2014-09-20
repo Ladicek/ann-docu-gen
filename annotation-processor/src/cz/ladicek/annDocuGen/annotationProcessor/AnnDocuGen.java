@@ -49,7 +49,7 @@ public class AnnDocuGen extends AbstractProcessor {
         collectDocumentation(roundEnv, doc);
 
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Documentation collected, generating files");
-        generateDocumentationFiles(doc);
+        doc.generateDocumentationFiles();
 
         return false;
     }
@@ -102,24 +102,6 @@ public class AnnDocuGen extends AbstractProcessor {
             }
 
             type.addProperty(doc.documentPropertyField(annotated));
-        }
-    }
-
-    private void generateDocumentationFiles(Documentation doc) {
-        try {
-            for (DocumentedClass type : doc.allDocumentedClasses()) {
-                FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                        type.fullName + ".md");
-                Writer writer = file.openWriter();
-                try {
-                    PrintWriter printWriter = new PrintWriter(writer);
-                    type.writeDocumentation(printWriter);
-                } finally {
-                    writer.close();
-                }
-            }
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "IO problem: " + e);
         }
     }
 }

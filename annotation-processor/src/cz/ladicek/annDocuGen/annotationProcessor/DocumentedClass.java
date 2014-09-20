@@ -10,14 +10,17 @@ public final class DocumentedClass {
     public final String simpleName;
     public final String fullName;
     public final String qualifierAndScopeAnnotations;
+    public final boolean isUnit; // if it implements (directly or indirectly) the Unit interface
     public final String javadoc;
 
     public final List<DocumentedProperty> properties = new ArrayList<DocumentedProperty>();
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
-    public DocumentedClass(String simpleName, String fullName, String qualifierAndScopeAnnotations, String javadoc) {
+    public DocumentedClass(String simpleName, String fullName, boolean isUnit, String qualifierAndScopeAnnotations,
+                           String javadoc) {
         this.simpleName = simpleName;
         this.fullName = fullName;
+        this.isUnit = isUnit;
         this.qualifierAndScopeAnnotations = qualifierAndScopeAnnotations;
         this.javadoc = javadoc;
     }
@@ -33,7 +36,7 @@ public final class DocumentedClass {
     // ---
 
     public void writeDocumentation(PrintWriter out) {
-        out.println("# " + simpleName);
+        out.println("# " + (isUnit ? "Unit" : "Service") + " `" + simpleName + "`");
         out.println();
         if (qualifierAndScopeAnnotations != null) {
             out.print("`" + shortenTypes(qualifierAndScopeAnnotations) + "` ");
