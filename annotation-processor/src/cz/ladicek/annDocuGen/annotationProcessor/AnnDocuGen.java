@@ -18,6 +18,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Set;
 
 import static cz.ladicek.annDocuGen.annotationProcessor.Utils.declaringClassOf;
@@ -30,14 +31,15 @@ public class AnnDocuGen extends AbstractProcessor {
         try {
             return doProcess(annotations, roundEnv);
         } catch (Exception e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "ERROR " + e);
-            return true;
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Unexpected error: " + e.getMessage()
+                    + " " + Arrays.toString(e.getStackTrace()));
+            return false;
         }
     }
 
     private boolean doProcess(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (annotations.isEmpty()) {
-            return true;
+            return false;
         }
 
         Documentation doc = new Documentation(processingEnv);
@@ -49,7 +51,7 @@ public class AnnDocuGen extends AbstractProcessor {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Documentation collected, generating files");
         generateDocumentationFiles(doc);
 
-        return true;
+        return false;
     }
 
     private void collectDocumentation(RoundEnvironment roundEnv, Documentation doc) {
@@ -101,7 +103,6 @@ public class AnnDocuGen extends AbstractProcessor {
             }
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "IO problem: " + e);
-            throw new RuntimeException(e);
         }
     }
 }
