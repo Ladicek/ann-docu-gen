@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static cz.ladicek.annDocuGen.annotationProcessor.Utils.shortenTypes;
+
 public final class DocumentedClass {
     public final String simpleName;
     public final String fullName;
@@ -34,7 +36,7 @@ public final class DocumentedClass {
         out.println("# " + simpleName);
         out.println();
         if (qualifierAndScopeAnnotations != null) {
-            out.print("`" + qualifierAndScopeAnnotations + "` ");
+            out.print("`" + shortenTypes(qualifierAndScopeAnnotations) + "` ");
         }
         out.println("__`" + fullName + "`__");
         out.println();
@@ -48,7 +50,7 @@ public final class DocumentedClass {
             out.println();
         } else {
             for (DocumentedProperty property : properties) {
-                out.print("__" + property.name + "__: `" + property.type + "`");
+                out.print("__" + property.name + "__: `" + shortenTypes(property.type) + "`");
                 if (property.initializer != null) {
                     out.print(" = `" + property.initializer + "`");
                 }
@@ -70,9 +72,9 @@ public final class DocumentedClass {
         } else {
             for (DocumentedDependency dependency : dependencies) {
                 if (dependency.qualifierAndScopeAnnotations != null) {
-                    out.print("`" + dependency.qualifierAndScopeAnnotations + "` ");
+                    out.print("`" + shortenTypes(dependency.qualifierAndScopeAnnotations) + "` ");
                 }
-                out.println("__`" + dependency.type + "`__");
+                out.println("__`" + shortenTypes(dependency.type) + "`__");
                 out.println();
                 out.println(formatJavadoc(dependency.javadoc));
                 out.println();
