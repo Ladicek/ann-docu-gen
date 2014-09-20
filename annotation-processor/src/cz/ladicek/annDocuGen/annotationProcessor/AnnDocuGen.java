@@ -24,7 +24,7 @@ import java.util.Set;
 import static cz.ladicek.annDocuGen.annotationProcessor.Utils.declaringClassOf;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes("cz.ladicek.annDocuGen.api.Inject")
+@SupportedAnnotationTypes({"cz.ladicek.annDocuGen.api.Inject", "cz.ladicek.annDocuGen.api.Property"})
 public class AnnDocuGen extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -55,36 +55,53 @@ public class AnnDocuGen extends AbstractProcessor {
     }
 
     private void collectDocumentation(RoundEnvironment roundEnv, Documentation doc) {
+        collectDocumentationForDependencies(roundEnv, doc);
+        collectDocumentationForProperties(roundEnv, doc);
+    }
+
+    private void collectDocumentationForDependencies(RoundEnvironment roundEnv, Documentation doc) {
         for (Element annotated : roundEnv.getElementsAnnotatedWith(Inject.class)) {
             Element clazz = declaringClassOf(annotated);
             DocumentedClass type = doc.documentClass(clazz);
 
             if (annotated.getAnnotation(Property.class) != null) {
-                if (annotated.getKind() != ElementKind.FIELD) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-                            "@Inject @Property is only supported for fields", annotated);
-                    continue;
-                }
-
-                type.addProperty(doc.documentPropertyField(annotated));
-            } else {
-                if (annotated.getKind() != ElementKind.CONSTRUCTOR && annotated.getKind() != ElementKind.FIELD) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-                            "@Inject is only supported for fields and constructors", annotated);
-                    continue;
-                }
-
-                switch (annotated.getKind()) {
-                    case FIELD:
-                        type.addDependency(doc.documentDependencyField(annotated));
-                        break;
-                    case CONSTRUCTOR:
-                        for (Element param : ((ExecutableElement) annotated).getParameters()) {
-                            type.addDependency(doc.documentDependencyConstructorParam(param));
-                        }
-                        break;
-                }
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                        "@Inject @Property is invalid. Use @Inject for dependencies and @Property for properties.",
+                        annotated);
+                continue;
             }
+
+            if (annotated.getKind() != ElementKind.CONSTRUCTOR && annotated.getKind() != ElementKind.FIELD) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                        "@Inject is only supported for fields and constructors", annotated);
+                continue;
+            }
+
+            switch (annotated.getKind()) {
+                case FIELD:
+                    type.addDependency(doc.documentDependencyField(annotated));
+                    break;
+                case CONSTRUCTOR:
+                    for (Element param : ((ExecutableElement) annotated).getParameters()) {
+                        type.addDependency(doc.documentDependencyConstructorParam(param));
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void collectDocumentationForProperties(RoundEnvironment roundEnv, Documentation doc) {
+        for (Element annotated : roundEnv.getElementsAnnotatedWith(Property.class)) {
+            Element clazz = declaringClassOf(annotated);
+            DocumentedClass type = doc.documentClass(clazz);
+
+            if (annotated.getKind() != ElementKind.FIELD) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                        "@Property is only supported for fields", annotated);
+                continue;
+            }
+
+            type.addProperty(doc.documentPropertyField(annotated));
         }
     }
 

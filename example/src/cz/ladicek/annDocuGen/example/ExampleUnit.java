@@ -12,36 +12,38 @@ public class ExampleUnit implements Unit {
     private Foo foo;
 
     /** A simple property */
-    @Inject @Property("my.property")
+    @Property("my.property")
     private String myProperty;
 
     /** Property of a primitive type */
-    @Inject @Property("my.other.property")
+    @Property("my.other.property")
     private long myOtherProperty;
 
     /** Another property of a primitive type */
-    @Inject @Property("my.next.property")
+    @Property("my.next.property")
     private boolean myNextProperty;
 
     /** Property with default value */
-    @Inject @Property("my.property.with.default.value")
+    @Property("my.property.with.default.value")
     private String myPropertyWithDefaultValue = "default value";
 
     /** Optional property */
-    @Inject @Property("my.optional.property")
+    @Property("my.optional.property")
     private Optional<String> myOptionalProperty;
 
     /** Optional property that defaults to absent explicitly */
-    @Inject @Property("my.optional.absenting.property")
+    @Property("my.optional.absenting.property")
     private Optional<String> myOptionalAbsentingProperty = Optional.absent();
 
     /** Another way of defining a property with default value */
-    @Inject @Property("my.optional.property.with.default.value")
+    @Property("my.optional.property.with.default.value")
     private Optional<String> myOptionalPropertyWithDefaultValue = Optional.of("default value");
 
     @Inject
-    public ExampleUnit(Baz baz) {}
+    public ExampleUnit(Baz baz) {
+    }
 
     @Override
-    public void execute() {}
+    public void execute() {
+    }
 }

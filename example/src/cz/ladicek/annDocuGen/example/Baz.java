@@ -6,9 +6,10 @@ import cz.ladicek.annDocuGen.api.Property;
 /** Baz service */
 public class Baz {
     /** Property baz */
-    @Inject @Property("baz")
+    @Property("baz")
     private String baz;
 
     @Inject
-    public Baz(Quux quux) {}
+    public Baz(Quux quux) {
+    }
 }

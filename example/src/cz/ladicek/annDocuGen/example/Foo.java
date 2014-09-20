@@ -6,7 +6,7 @@ import cz.ladicek.annDocuGen.api.Property;
 /** Foo service */
 public class Foo {
     /** Property foo */
-    @Inject @Property("foo")
+    @Property("foo")
     private String foo;
 
     /** Depends on Bar */

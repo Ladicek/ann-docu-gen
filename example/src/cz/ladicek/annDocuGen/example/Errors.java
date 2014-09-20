@@ -5,12 +5,19 @@ import cz.ladicek.annDocuGen.api.Property;
 
 /** Examples of unsupported annotation positions */
 public class Errors {
-    @Inject @Property("error.1")
-    public void a() {}
+    @Inject
+    @Property("error.1")
+    private String a;
+
+    @Property("error.2")
+    public void b() {
+    }
 
     @Inject
-    public void b(Baz bar) {}
+    public void c(Baz bar) {
+    }
 
-    @Inject @Property("error.2")
-    public Errors() {}
+    @Property("error.3")
+    public Errors() {
+    }
 }
