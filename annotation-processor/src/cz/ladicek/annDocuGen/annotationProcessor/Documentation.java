@@ -43,12 +43,42 @@ public final class Documentation {
     public DocumentedProperty documentPropertyField(Element annotatedField) {
         TypeMirror fieldTypeErased = processingEnv.getTypeUtils().erasure(annotatedField.asType());
         boolean isOptional = processingEnv.getTypeUtils().isSameType(optionalTypeErased, fieldTypeErased);
+        boolean isPrimitive = fieldTypeErased.getKind().isPrimitive();
 
         String name = annotatedField.getAnnotation(Property.class).value();
         String type = annotatedField.asType().toString();
         String initializer = fieldInitializerDiscovery.getFor(annotatedField);
-        if (initializer == null && isOptional) {
-            initializer = "Optional.absent() /* implied */";
+        if (initializer == null) {
+            if (isOptional) {
+                initializer = "Optional.absent() /* implied */";
+            } else if (isPrimitive) {
+                switch(fieldTypeErased.getKind()) {
+                    case BOOLEAN:
+                        initializer = "false /* primitive default */";
+                        break;
+                    case BYTE:
+                        initializer = "0 /* primitive default */";
+                        break;
+                    case SHORT:
+                        initializer = "0 /* primitive default */";
+                        break;
+                    case INT:
+                        initializer = "0 /* primitive default */";
+                        break;
+                    case LONG:
+                        initializer = "0L /* primitive default */";
+                        break;
+                    case FLOAT:
+                        initializer = "0.0F /* primitive default */";
+                        break;
+                    case DOUBLE:
+                        initializer = "0.0 /* primitive default */";
+                        break;
+                    case CHAR:
+                        initializer = "'\\u0000' /* primitive default */";
+                        break;
+                }
+            }
         }
         boolean mandatory = initializer == null;
         String javadoc = processingEnv.getElementUtils().getDocComment(annotatedField);

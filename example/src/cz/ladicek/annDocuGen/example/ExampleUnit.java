@@ -19,6 +19,10 @@ public class ExampleUnit implements Unit {
     @Inject @Property("my.other.property")
     private long myOtherProperty;
 
+    /** Another property of a primitive type */
+    @Inject @Property("my.next.property")
+    private boolean myNextProperty;
+
     /** Property with default value */
     @Inject @Property("my.property.with.default.value")
     private String myPropertyWithDefaultValue = "default value";
