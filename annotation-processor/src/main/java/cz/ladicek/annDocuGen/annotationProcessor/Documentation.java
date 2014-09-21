@@ -135,24 +135,22 @@ public final class Documentation {
 
         out.println("## Units");
         out.println();
-        if (units.isEmpty()) {
-            out.println("_None_");
-            out.println();
-        } else {
-            for (DocumentedClass unit : units) {
-                out.println("- " + unit.simpleName);
-            }
-        }
+        generateClassListInIndex(units, out);
+
         out.println();
 
         out.println("## Services");
         out.println();
-        if (services.isEmpty()) {
+        generateClassListInIndex(services, out);
+    }
+
+    private void generateClassListInIndex(List<DocumentedClass> classes, PrintWriter out) {
+        if (classes.isEmpty()) {
             out.println("_None_");
             out.println();
         } else {
-            for (DocumentedClass service : services) {
-                out.println("- " + service.simpleName);
+            for (DocumentedClass clazz : classes) {
+                out.println("- `" + clazz.simpleName + "` (" + clazz.javadoc.firstSentence() + ")");
             }
         }
     }

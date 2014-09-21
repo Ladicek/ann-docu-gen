@@ -9,7 +9,11 @@ import cz.ladicek.annDocuGen.api.Unit;
 import javax.inject.Inject;
 import java.util.Map;
 
-/** Example unit */
+/**
+ * <p>Example &lt;testing&gt; unit. This is a second sentence.</p>
+ *
+ * <p>This shows most of the valid usecases of {@code AnnDocuGen}.</p>
+ */
 public class ExampleUnit implements Unit {
     /** Depends on Foo */
     @Inject
