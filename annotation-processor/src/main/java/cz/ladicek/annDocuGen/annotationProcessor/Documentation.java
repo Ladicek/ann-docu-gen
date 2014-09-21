@@ -21,7 +21,7 @@ import java.util.Map;
 import static cz.ladicek.annDocuGen.annotationProcessor.Utils.qualifierAndScopeAnnotationsOf;
 
 public final class Documentation {
-    private static final String OPTIONAL_TYPE_FQN = "cz.ladicek.annDocuGen.api.Optional";
+    private static final String OPTIONAL_TYPE_FQN = "com.google.common.base.Optional";
     private static final String UNIT_TYPE_FQN = "cz.ladicek.annDocuGen.api.Unit";
 
     private final ProcessingEnvironment processingEnv;

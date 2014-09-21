@@ -1,8 +1,9 @@
 package cz.ladicek.annDocuGen.example;
 
-import cz.ladicek.annDocuGen.api.Inject;
 import cz.ladicek.annDocuGen.api.Property;
-import cz.ladicek.annDocuGen.api.Singleton;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /** Foo service */
 @Singleton

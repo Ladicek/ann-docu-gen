@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cz.ladicek.annDocuGen</groupId>
+    <artifactId>ann-docu-gen-parent</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>AnnDocuGen: Parent</name>
+
+    <modules>
+        <module>annotation-processor</module>
+        <module>example</module>
+        <module>framework</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <version.java>1.6</version.java>
+
+        <tools.jar.path>${java.home}/../lib/tools.jar</tools.jar.path>
+
+        <!-- All versions. Keep in alphabetical order. Name format: version.${groupId}[.${artifactId}]. -->
+        <version.com.google.guava>18.0</version.com.google.guava>
+        <version.javax.inject>1</version.javax.inject>
+        <version.org.apache.maven.plugin.maven-compiler-plugin>3.1</version.org.apache.maven.plugin.maven-compiler-plugin>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- modules -->
+            <dependency>
+                <groupId>cz.ladicek.annDocuGen</groupId>
+                <artifactId>ann-docu-gen-annotation-processor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cz.ladicek.annDocuGen</groupId>
+                <artifactId>ann-docu-gen-examle</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cz.ladicek.annDocuGen</groupId>
+                <artifactId>ann-docu-gen-framework</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- main dependencies -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${version.com.google.guava}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <version>${version.javax.inject}</version>
+            </dependency>
+            <dependency>
+                <groupId>sun.jdk</groupId>
+                <artifactId>tools</artifactId>
+                <version>${version.java}</version>
+                <scope>system</scope>
+                <systemPath>${tools.jar.path}</systemPath>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${version.org.apache.maven.plugin.maven-compiler-plugin}</version>
+                    <configuration>
+                        <source>${version.java}</source>
+                        <target>${version.java}</target>
+                        <showWarnings>true</showWarnings>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>tools.jar.on.osx</id>
+            <activation>
+                <file>
+                    <exists>${java.home}/../Classes/classes.jar</exists>
+                </file>
+            </activation>
+            <properties>
+                <tools.jar.path>${java.home}/../Classes/classes.jar</tools.jar.path>
+            </properties>
+        </profile>
+    </profiles>
+</project>

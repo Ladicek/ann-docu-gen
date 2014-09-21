@@ -1,8 +1,7 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
-import cz.ladicek.annDocuGen.api.Qualifier;
-import cz.ladicek.annDocuGen.api.Scope;
-
+import javax.inject.Qualifier;
+import javax.inject.Scope;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;

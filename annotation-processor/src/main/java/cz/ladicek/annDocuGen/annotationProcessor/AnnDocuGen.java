@@ -1,30 +1,25 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
-import cz.ladicek.annDocuGen.api.Inject;
 import cz.ladicek.annDocuGen.api.Property;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
+import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Set;
 
 import static cz.ladicek.annDocuGen.annotationProcessor.Utils.declaringClassOf;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes({"cz.ladicek.annDocuGen.api.Inject", "cz.ladicek.annDocuGen.api.Property"})
+@SupportedAnnotationTypes({"javax.inject.Inject", "cz.ladicek.annDocuGen.api.Property"})
 public class AnnDocuGen extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {

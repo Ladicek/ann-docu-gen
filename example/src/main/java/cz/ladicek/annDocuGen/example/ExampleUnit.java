@@ -1,12 +1,12 @@
 package cz.ladicek.annDocuGen.example;
 
+import com.google.common.base.Optional;
 import cz.ladicek.annDocuGen.api.EnvironmentVariables;
-import cz.ladicek.annDocuGen.api.Inject;
-import cz.ladicek.annDocuGen.api.Optional;
 import cz.ladicek.annDocuGen.api.Property;
 import cz.ladicek.annDocuGen.api.TheAnswer;
 import cz.ladicek.annDocuGen.api.Unit;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 /** Example unit */

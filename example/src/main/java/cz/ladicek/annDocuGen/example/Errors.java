@@ -1,7 +1,8 @@
 package cz.ladicek.annDocuGen.example;
 
-import cz.ladicek.annDocuGen.api.Inject;
 import cz.ladicek.annDocuGen.api.Property;
+
+import javax.inject.Inject;
 
 /** Examples of unsupported annotation positions */
 public class Errors {
