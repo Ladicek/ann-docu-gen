@@ -1,27 +1,29 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
+import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-
-import static cz.ladicek.annDocuGen.annotationProcessor.Utils.shortenTypes;
 
 public final class DocumentedClass {
     public final String simpleName;
     public final String fullName;
-    public final String qualifierAndScopeAnnotations;
+    public final DocumentedAnnotations documentedAnnotations;
     public final boolean isUnit; // if it implements (directly or indirectly) the Unit interface
-    public final String javadoc;
+    public final Javadoc javadoc;
 
     public final List<DocumentedProperty> properties = new ArrayList<DocumentedProperty>();
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
-    public DocumentedClass(String simpleName, String fullName, boolean isUnit, String qualifierAndScopeAnnotations,
-                           String javadoc) {
+    public DocumentedClass(String simpleName, String fullName, boolean isUnit,
+                           DocumentedAnnotations documentedAnnotations, Javadoc javadoc) {
         this.simpleName = simpleName;
         this.fullName = fullName;
         this.isUnit = isUnit;
-        this.qualifierAndScopeAnnotations = qualifierAndScopeAnnotations;
+        this.documentedAnnotations = documentedAnnotations;
         this.javadoc = javadoc;
     }
 
@@ -38,13 +40,15 @@ public final class DocumentedClass {
     public void writeDocumentation(PrintWriter out) {
         out.println("# " + (isUnit ? "Unit" : "Service") + " `" + simpleName + "`");
         out.println();
-        if (qualifierAndScopeAnnotations != null) {
-            out.print("`" + shortenTypes(qualifierAndScopeAnnotations) + "` ");
+        if (documentedAnnotations.exist()) {
+            out.print("`" + documentedAnnotations + "` ");
         }
         out.println("__`" + fullName + "`__");
         out.println();
-        out.println(formatJavadoc(javadoc));
-        out.println();
+        if (javadoc.exists()) {
+            out.println(javadoc.formatForOutput());
+            out.println();
+        }
 
         out.println("## Properties");
         out.println();
@@ -53,8 +57,8 @@ public final class DocumentedClass {
             out.println();
         } else {
             for (DocumentedProperty property : properties) {
-                out.print("__" + property.name + "__: `" + shortenTypes(property.type) + "`");
-                if (property.initializer != null) {
+                out.print("__" + property.name + "__: `" + property.type.simpleName() + "`");
+                if (property.initializer.exists()) {
                     out.print(" = `" + property.initializer + "`");
                 }
                 if (property.mandatory) {
@@ -62,8 +66,10 @@ public final class DocumentedClass {
                 }
                 out.println();
                 out.println();
-                out.println(formatJavadoc(property.javadoc));
-                out.println();
+                if (property.javadoc.exists()) {
+                    out.println(property.javadoc.formatForOutput());
+                    out.println();
+                }
             }
         }
 
@@ -74,18 +80,23 @@ public final class DocumentedClass {
             out.println();
         } else {
             for (DocumentedDependency dependency : dependencies) {
-                if (dependency.qualifierAndScopeAnnotations != null) {
-                    out.print("`" + shortenTypes(dependency.qualifierAndScopeAnnotations) + "` ");
+                if (dependency.documentedAnnotations.exist()) {
+                    out.print("`" + dependency.documentedAnnotations + "` ");
                 }
-                out.println("__`" + shortenTypes(dependency.type) + "`__");
+                out.println("__`" + dependency.type.simpleName() + "`__");
                 out.println();
-                out.println(formatJavadoc(dependency.javadoc));
-                out.println();
+                if (dependency.javadoc.exists()) {
+                    out.println(dependency.javadoc.formatForOutput());
+                    out.println();
+                }
             }
         }
     }
 
-    private String formatJavadoc(String javadoc) {
-        return javadoc == null ? "" : "> " + javadoc.replaceAll("\n", "\n> ");
-    }
+    public static final Comparator<DocumentedClass> SIMPLE_NAME_COMPARATOR = new Comparator<DocumentedClass>() {
+        @Override
+        public int compare(DocumentedClass o1, DocumentedClass o2) {
+            return o1.simpleName.compareTo(o2.simpleName);
+        }
+    };
 }

@@ -1,16 +1,16 @@
-package cz.ladicek.annDocuGen.annotationProcessor;
+package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
 public interface FieldInitializerDiscovery {
-    String getFor(Element field);
+    FieldInitializer getFor(Element field);
 
     public static final FieldInitializerDiscovery VOID = new FieldInitializerDiscovery() {
         @Override
-        public String getFor(Element field) {
-            return null;
+        public FieldInitializer getFor(Element field) {
+            return new FieldInitializer(null);
         }
     };
 

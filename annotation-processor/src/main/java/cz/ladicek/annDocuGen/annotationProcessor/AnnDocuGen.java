@@ -16,7 +16,7 @@ import javax.tools.Diagnostic;
 import java.util.Arrays;
 import java.util.Set;
 
-import static cz.ladicek.annDocuGen.annotationProcessor.Utils.declaringClassOf;
+import static cz.ladicek.annDocuGen.annotationProcessor.Elements.declaringClassOf;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({"javax.inject.Inject", "cz.ladicek.annDocuGen.api.Property"})
@@ -74,11 +74,11 @@ public class AnnDocuGen extends AbstractProcessor {
 
             switch (annotated.getKind()) {
                 case FIELD:
-                    type.addDependency(doc.documentDependencyField(annotated));
+                    type.addDependency(doc.documentDependency(annotated));
                     break;
                 case CONSTRUCTOR:
                     for (Element param : ((ExecutableElement) annotated).getParameters()) {
-                        type.addDependency(doc.documentDependencyConstructorParam(param));
+                        type.addDependency(doc.documentDependency(param));
                     }
                     break;
             }
@@ -96,7 +96,7 @@ public class AnnDocuGen extends AbstractProcessor {
                 continue;
             }
 
-            type.addProperty(doc.documentPropertyField(annotated));
+            type.addProperty(doc.documentProperty(annotated));
         }
     }
 }

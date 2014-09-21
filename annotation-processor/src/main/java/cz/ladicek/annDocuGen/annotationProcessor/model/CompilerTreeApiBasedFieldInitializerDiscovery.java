@@ -1,4 +1,4 @@
-package cz.ladicek.annDocuGen.annotationProcessor;
+package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.VariableTree;
@@ -16,7 +16,7 @@ public class CompilerTreeApiBasedFieldInitializerDiscovery implements FieldIniti
     }
 
     @Override
-    public String getFor(Element field) {
+    public FieldInitializer getFor(Element field) {
         try {
             return doGetFor(field);
         } catch (Exception e) {
@@ -26,10 +26,10 @@ public class CompilerTreeApiBasedFieldInitializerDiscovery implements FieldIniti
         }
     }
 
-    private String doGetFor(Element field) {
+    private FieldInitializer doGetFor(Element field) {
         Trees trees = Trees.instance(processingEnv);
         VariableTree fieldNode = (VariableTree) trees.getTree(field);
         ExpressionTree initializer = fieldNode.getInitializer();
-        return initializer != null ? initializer.toString() : null;
+        return new FieldInitializer(initializer != null ? initializer.toString() : null);
     }
 }

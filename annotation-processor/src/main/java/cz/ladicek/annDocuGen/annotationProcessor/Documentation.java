@@ -1,5 +1,10 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
+import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
+import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializerDiscovery;
+import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
+import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 import cz.ladicek.annDocuGen.api.Property;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -13,12 +18,9 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static cz.ladicek.annDocuGen.annotationProcessor.Utils.qualifierAndScopeAnnotationsOf;
 
 public final class Documentation {
     private static final String OPTIONAL_TYPE_FQN = "com.google.common.base.Optional";
@@ -44,71 +46,42 @@ public final class Documentation {
         DocumentedClass type = classes.get(fullName);
         if (type == null) {
             boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
-            type = new DocumentedClass(clazz.getSimpleName().toString(), fullName, isUnit,
-                    qualifierAndScopeAnnotationsOf(clazz), processingEnv.getElementUtils().getDocComment(clazz));
+            DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(clazz);
+            Javadoc javadoc = new Javadoc(processingEnv, clazz);
+            type = new DocumentedClass(clazz.getSimpleName().toString(), fullName, isUnit, documentedAnnotations,
+                    javadoc);
             classes.put(fullName, type);
         }
+
         return type;
     }
 
-    public DocumentedProperty documentPropertyField(Element annotatedField) {
-        TypeMirror fieldTypeErased = processingEnv.getTypeUtils().erasure(annotatedField.asType());
+    public DocumentedDependency documentDependency(Element fieldOrCtorParam) {
+        TypeName className = new TypeName(fieldOrCtorParam);
+        DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(fieldOrCtorParam);
+        Javadoc javadoc = new Javadoc(processingEnv, fieldOrCtorParam);
+        return new DocumentedDependency(className, documentedAnnotations, javadoc);
+    }
+
+    public DocumentedProperty documentProperty(Element field) {
+        TypeMirror fieldTypeErased = processingEnv.getTypeUtils().erasure(field.asType());
         boolean isOptional = processingEnv.getTypeUtils().isSameType(optionalTypeErased, fieldTypeErased);
         boolean isPrimitive = fieldTypeErased.getKind().isPrimitive();
 
-        String name = annotatedField.getAnnotation(Property.class).value();
-        String type = annotatedField.asType().toString();
-        String initializer = fieldInitializerDiscovery.getFor(annotatedField);
-        if (initializer == null) {
+        String name = field.getAnnotation(Property.class).value();
+        TypeName type = new TypeName(field);
+        FieldInitializer initializer = fieldInitializerDiscovery.getFor(field);
+        if (!initializer.exists()) {
             if (isOptional) {
-                initializer = "Optional.absent() /* implied */";
+                initializer = FieldInitializer.impliedOptionalAbsent();
             } else if (isPrimitive) {
-                switch (fieldTypeErased.getKind()) {
-                    case BOOLEAN:
-                        initializer = "false /* primitive default */";
-                        break;
-                    case BYTE:
-                        initializer = "0 /* primitive default */";
-                        break;
-                    case SHORT:
-                        initializer = "0 /* primitive default */";
-                        break;
-                    case INT:
-                        initializer = "0 /* primitive default */";
-                        break;
-                    case LONG:
-                        initializer = "0L /* primitive default */";
-                        break;
-                    case FLOAT:
-                        initializer = "0.0F /* primitive default */";
-                        break;
-                    case DOUBLE:
-                        initializer = "0.0 /* primitive default */";
-                        break;
-                    case CHAR:
-                        initializer = "'\\u0000' /* primitive default */";
-                        break;
-                }
+                initializer = FieldInitializer.primitiveTypeDefault(fieldTypeErased.getKind());
             }
         }
-        boolean mandatory = initializer == null;
-        String javadoc = processingEnv.getElementUtils().getDocComment(annotatedField);
+        boolean mandatory = !initializer.exists();
+        Javadoc javadoc = new Javadoc(processingEnv, field);
         return new DocumentedProperty(name, type, initializer, mandatory, javadoc);
     }
-
-    public DocumentedDependency documentDependencyField(Element annotatedField) {
-        String className = annotatedField.asType().toString();
-        String annotations = qualifierAndScopeAnnotationsOf(annotatedField);
-        String javadoc = processingEnv.getElementUtils().getDocComment(annotatedField);
-        return new DocumentedDependency(className, annotations, javadoc);
-    }
-
-    public DocumentedDependency documentDependencyConstructorParam(Element ctorParam) {
-        String className = ctorParam.asType().toString();
-        String annotations = qualifierAndScopeAnnotationsOf(ctorParam);
-        return new DocumentedDependency(className, annotations, null); // no javadoc for constructor parameters
-    }
-
 
     public void generateDocumentationFiles() {
         try {
@@ -154,8 +127,8 @@ public final class Documentation {
                 services.add(clazz);
             }
         }
-        Collections.sort(units, CLASS_COMPARATOR);
-        Collections.sort(services, CLASS_COMPARATOR);
+        Collections.sort(units, DocumentedClass.SIMPLE_NAME_COMPARATOR);
+        Collections.sort(services, DocumentedClass.SIMPLE_NAME_COMPARATOR);
 
         out.println("# Index");
         out.println();
@@ -183,11 +156,4 @@ public final class Documentation {
             }
         }
     }
-
-    private static final Comparator<DocumentedClass> CLASS_COMPARATOR = new Comparator<DocumentedClass>() {
-        @Override
-        public int compare(DocumentedClass o1, DocumentedClass o2) {
-            return o1.simpleName.compareTo(o2.simpleName);
-        }
-    };
 }
