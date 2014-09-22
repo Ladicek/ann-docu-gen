@@ -24,8 +24,9 @@ public final class Javadoc {
         return value.isPresent();
     }
 
-    public String formatForOutput() {
-        return value.isPresent() ? "> " + value.get().trim().replaceAll("\n", "\n> ") : "";
+    @Override
+    public String toString() {
+        return value.or("");
     }
 
     public String firstSentence() {

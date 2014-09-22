@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{simpleName}}</title>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>{{#isUnit}}Unit{{/isUnit}}{{^isUnit}}Service{{/isUnit}} <code>{{simpleName}}</code></h1>
+
+<p>
+    <b>{{fullName}}</b>
+    {{#documentedAnnotations.exist}}<code>{{documentedAnnotations}}</code>{{/documentedAnnotations.exist}}
+</p>
+
+{{#javadoc.exists}}
+    <blockquote>{{{javadoc}}}</blockquote>
+{{/javadoc.exists}}
+
+<h2>Properties</h2>
+
+{{^properties}}
+    <p><em>None</em></p>
+{{/properties}}
+{{#properties}}
+    <p>
+        <strong>{{name}}</strong>: <code>{{type.simpleName}}</code>
+        {{#initializer.exists}}= <code>{{initializer}}</code>{{/initializer.exists}}
+        {{#mandatory}}<strong>mandatory</strong>{{/mandatory}}
+    </p>
+    {{#javadoc.exists}}
+        <blockquote>{{{javadoc}}}</blockquote>
+    {{/javadoc.exists}}
+{{/properties}}
+
+<h2>Dependencies</h2>
+
+{{^dependencies}}
+    <p><em>None</em></p>
+{{/dependencies}}
+{{#dependencies}}
+    <p>
+        <strong>{{type.simpleName}}</strong>
+        {{#documentedAnnotations.exist}}<code>{{documentedAnnotations}}</code>{{/documentedAnnotations.exist}}
+    </p>
+    {{#javadoc.exists}}
+        <blockquote>{{{javadoc}}}</blockquote>
+    {{/javadoc.exists}}
+{{/dependencies}}
+
+</body>
+</html>

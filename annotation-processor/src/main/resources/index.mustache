@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>{{title}}</h1>
+
+<h2>Units</h2>
+
+<table class="table table-striped table-condensed table-hover">
+{{#units}}
+    <tr>
+        <td><a href="{{fullName}}.html">{{simpleName}}</a></td>
+        <td>{{{javadoc.firstSentence}}}</td>
+    </tr>
+{{/units}}
+</table>
+
+<h2>Services</h2>
+
+<table class="table table-striped table-condensed table-hover">
+    {{#services}}
+    <tr>
+        <td><a href="{{fullName}}.html">{{simpleName}}</a></td>
+        <td>{{{javadoc.firstSentence}}}</td>
+    </tr>
+    {{/services}}
+</table>
+
+</body>
+</html>

@@ -23,6 +23,7 @@
         <tools.jar.path>${java.home}/../lib/tools.jar</tools.jar.path>
 
         <!-- All versions. Keep in alphabetical order. Name format: version.${groupId}[.${artifactId}]. -->
+        <version.com.github.spullara.mustache.java>0.8.16</version.com.github.spullara.mustache.java>
         <version.com.google.guava>18.0</version.com.google.guava>
         <version.javax.inject>1</version.javax.inject>
         <version.org.apache.maven.plugin.maven-compiler-plugin>3.1</version.org.apache.maven.plugin.maven-compiler-plugin>
@@ -49,6 +50,31 @@
             </dependency>
 
             <!-- main dependencies -->
+            <dependency>
+                <groupId>com.github.spullara.mustache.java</groupId>
+                <artifactId>compiler</artifactId>
+                <version>${version.com.github.spullara.mustache.java}</version>
+                <exclusions>
+                    <!-- we already depend on Guava -->
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <!-- these are not needed at all, and declared as "provided" in mustache.java -->
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala-library</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.twitter</groupId>
+                        <artifactId>util-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jruby</groupId>
+                        <artifactId>jruby</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>

@@ -1,9 +1,12 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
+import com.github.mustachejava.Mustache;
+import com.google.common.collect.ImmutableMap;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
 
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -33,64 +36,6 @@ public final class DocumentedClass {
 
     public void addDependency(DocumentedDependency dependency) {
         dependencies.add(dependency);
-    }
-
-    // ---
-
-    public void writeDocumentation(PrintWriter out) {
-        out.println("# " + (isUnit ? "Unit" : "Service") + " `" + simpleName + "`");
-        out.println();
-        if (documentedAnnotations.exist()) {
-            out.print("`" + documentedAnnotations + "` ");
-        }
-        out.println("__`" + fullName + "`__");
-        out.println();
-        if (javadoc.exists()) {
-            out.println(javadoc.formatForOutput());
-            out.println();
-        }
-
-        out.println("## Properties");
-        out.println();
-        if (properties.isEmpty()) {
-            out.println("_None_");
-            out.println();
-        } else {
-            for (DocumentedProperty property : properties) {
-                out.print("__" + property.name + "__: `" + property.type.simpleName() + "`");
-                if (property.initializer.exists()) {
-                    out.print(" = `" + property.initializer + "`");
-                }
-                if (property.mandatory) {
-                    out.print(" __mandatory__");
-                }
-                out.println();
-                out.println();
-                if (property.javadoc.exists()) {
-                    out.println(property.javadoc.formatForOutput());
-                    out.println();
-                }
-            }
-        }
-
-        out.println("## Dependencies");
-        out.println();
-        if (dependencies.isEmpty()) {
-            out.println("_None_");
-            out.println();
-        } else {
-            for (DocumentedDependency dependency : dependencies) {
-                if (dependency.documentedAnnotations.exist()) {
-                    out.print("`" + dependency.documentedAnnotations + "` ");
-                }
-                out.println("__`" + dependency.type.simpleName() + "`__");
-                out.println();
-                if (dependency.javadoc.exists()) {
-                    out.println(dependency.javadoc.formatForOutput());
-                    out.println();
-                }
-            }
-        }
     }
 
     public static final Comparator<DocumentedClass> SIMPLE_NAME_COMPARATOR = new Comparator<DocumentedClass>() {

@@ -1,5 +1,10 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Resources;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializerDiscovery;
@@ -14,8 +19,9 @@ import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,6 +89,8 @@ public final class Documentation {
         return new DocumentedProperty(name, type, initializer, mandatory, javadoc);
     }
 
+    // ---
+
     public void generateDocumentationFiles() {
         try {
             doGenerateDocumentationFiles();
@@ -92,32 +100,49 @@ public final class Documentation {
     }
 
     private void doGenerateDocumentationFiles() throws IOException {
+        copyStaticAsset("bootstrap.css");
+        copyStaticAsset("style.css");
+
+        MustacheFactory mustache = new DefaultMustacheFactory();
+
         {
+            Mustache template = mustache.compile("index.mustache");
             FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                    "index.md");
+                    "index.html");
             Writer writer = file.openWriter();
             try {
-                PrintWriter printWriter = new PrintWriter(writer);
-                generateIndex(printWriter);
+                generateIndex(template, writer);
             } finally {
                 writer.close();
             }
         }
 
+        Mustache template = mustache.compile("class.mustache");
         for (DocumentedClass type : classes.values()) {
             FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                    type.fullName + ".md");
+                    type.fullName + ".html");
             Writer writer = file.openWriter();
             try {
-                PrintWriter printWriter = new PrintWriter(writer);
-                type.writeDocumentation(printWriter);
+                template.execute(writer, type);
             } finally {
                 writer.close();
             }
         }
     }
 
-    private void generateIndex(PrintWriter out) {
+    private void copyStaticAsset(String fileName) throws IOException {
+        FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
+                fileName);
+        OutputStream outputStream = file.openOutputStream();
+        try {
+            URL url = Resources.getResource(Documentation.class, "/" + fileName);
+            Resources.copy(url, outputStream);
+        } finally {
+            outputStream.close();
+        }
+    }
+
+    private void generateIndex(Mustache template, Writer out) {
         List<DocumentedClass> units = new ArrayList<DocumentedClass>();
         List<DocumentedClass> services = new ArrayList<DocumentedClass>();
         for (DocumentedClass clazz : classes.values()) {
@@ -130,28 +155,11 @@ public final class Documentation {
         Collections.sort(units, DocumentedClass.SIMPLE_NAME_COMPARATOR);
         Collections.sort(services, DocumentedClass.SIMPLE_NAME_COMPARATOR);
 
-        out.println("# Index");
-        out.println();
-
-        out.println("## Units");
-        out.println();
-        generateClassListInIndex(units, out);
-
-        out.println();
-
-        out.println("## Services");
-        out.println();
-        generateClassListInIndex(services, out);
-    }
-
-    private void generateClassListInIndex(List<DocumentedClass> classes, PrintWriter out) {
-        if (classes.isEmpty()) {
-            out.println("_None_");
-            out.println();
-        } else {
-            for (DocumentedClass clazz : classes) {
-                out.println("- `" + clazz.simpleName + "` (" + clazz.javadoc.firstSentence() + ")");
-            }
-        }
+        ImmutableMap<String, Object> context = ImmutableMap.<String, Object>builder()
+                .put("title", "Index")
+                .put("units", units)
+                .put("services", services)
+                .build();
+        template.execute(out, context);
     }
 }
