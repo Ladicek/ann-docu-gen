@@ -2,7 +2,37 @@ body {
     margin: 2em;
 }
 
-.table td a {
+p.lead {
+    margin-bottom: 10px;
+}
+
+code {
+    color: #25c74e;
+    background-color: #f2f9f4;
+}
+
+a {
+    color: #25c74e;
+}
+
+a:hover,
+a:focus {
+    color: #05a72e;
+}
+
+table.table td a {
     display: block;
     width: auto;
+}
+
+table.table td {
+    border-bottom: 1px solid #ddd;
+}
+
+table.index-table {
+    table-layout: fixed;
+}
+
+table.index-table td:first-child {
+    width: 25%;
 }

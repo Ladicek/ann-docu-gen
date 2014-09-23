@@ -9,13 +9,13 @@
 <body>
 <h1>{{#isUnit}}Unit{{/isUnit}}{{^isUnit}}Service{{/isUnit}} <code>{{simpleName}}</code></h1>
 
-<p>
+<p class="lead">
     <b>{{fullName}}</b>
     {{#documentedAnnotations.exist}}<code>{{documentedAnnotations}}</code>{{/documentedAnnotations.exist}}
 </p>
 
 {{#javadoc.exists}}
-    <blockquote>{{{javadoc}}}</blockquote>
+    <div class="well well-sm">{{{javadoc}}}</div>
 {{/javadoc.exists}}
 
 <h2>Properties</h2>
@@ -24,13 +24,13 @@
     <p><em>None</em></p>
 {{/properties}}
 {{#properties}}
-    <p>
+    <p class="lead">
         <strong>{{name}}</strong>: <code>{{type.simpleName}}</code>
         {{#initializer.exists}}= <code>{{initializer}}</code>{{/initializer.exists}}
-        {{#mandatory}}<strong>mandatory</strong>{{/mandatory}}
+        {{#mandatory}}<span class="label label-danger">Mandatory</span>{{/mandatory}}
     </p>
     {{#javadoc.exists}}
-        <blockquote>{{{javadoc}}}</blockquote>
+        <div class="well well-sm">{{{javadoc}}}</div>
     {{/javadoc.exists}}
 {{/properties}}
 
@@ -40,12 +40,12 @@
     <p><em>None</em></p>
 {{/dependencies}}
 {{#dependencies}}
-    <p>
+    <p class="lead">
         <strong>{{type.simpleName}}</strong>
         {{#documentedAnnotations.exist}}<code>{{documentedAnnotations}}</code>{{/documentedAnnotations.exist}}
     </p>
     {{#javadoc.exists}}
-        <blockquote>{{{javadoc}}}</blockquote>
+        <div class="well well-sm">{{{javadoc}}}</div>
     {{/javadoc.exists}}
 {{/dependencies}}
 
