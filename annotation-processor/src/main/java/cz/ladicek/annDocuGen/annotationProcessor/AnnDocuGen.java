@@ -56,15 +56,15 @@ public class AnnDocuGen extends AbstractProcessor {
 
     private void collectDocumentationForDependencies(RoundEnvironment roundEnv, Documentation doc) {
         for (Element annotated : roundEnv.getElementsAnnotatedWith(Inject.class)) {
-            Element clazz = declaringClassOf(annotated);
-            DocumentedClass type = doc.documentClass(clazz);
-
             if (annotated.getAnnotation(Property.class) != null) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
                         "@Inject @Property is invalid. Use @Inject for dependencies and @Property for properties.",
                         annotated);
                 continue;
             }
+
+            Element clazz = declaringClassOf(annotated);
+            DocumentedClass type = doc.documentClass(clazz);
 
             if (annotated.getKind() != ElementKind.CONSTRUCTOR && annotated.getKind() != ElementKind.FIELD) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
@@ -87,6 +87,11 @@ public class AnnDocuGen extends AbstractProcessor {
 
     private void collectDocumentationForProperties(RoundEnvironment roundEnv, Documentation doc) {
         for (Element annotated : roundEnv.getElementsAnnotatedWith(Property.class)) {
+            if (annotated.getAnnotation(Inject.class) != null) {
+                // warning is printed out in collectDocumentationForDependencies, no need to do it here too
+                continue;
+            }
+
             Element clazz = declaringClassOf(annotated);
             DocumentedClass type = doc.documentClass(clazz);
 
