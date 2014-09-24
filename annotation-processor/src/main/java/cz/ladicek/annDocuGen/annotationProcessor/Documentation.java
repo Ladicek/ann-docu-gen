@@ -6,6 +6,7 @@ import com.github.mustachejava.MustacheFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
+import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredDependency;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializerDiscovery;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
@@ -25,8 +26,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class Documentation {
     private static final String OPTIONAL_TYPE_FQN = "com.google.common.base.Optional";
@@ -36,7 +39,8 @@ public final class Documentation {
     private final TypeMirror optionalTypeErased;
     private final TypeMirror unitType;
     private final FieldInitializerDiscovery fieldInitializerDiscovery;
-    private final Map<String, DocumentedClass> classes = new HashMap<String, DocumentedClass>();
+    private final Map<TypeName, DocumentedClass> classes = new HashMap<TypeName, DocumentedClass>();
+    private final Set<EncounteredDependency> encounteredDependencies = new HashSet<EncounteredDependency>();
 
     public Documentation(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -47,22 +51,30 @@ public final class Documentation {
     }
 
     public DocumentedClass documentClass(Element clazz) {
-        String fullName = clazz.toString();
+        TypeName fullName = new TypeName(clazz);
 
-        DocumentedClass type = classes.get(fullName);
-        if (type == null) {
-            boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
-            DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(clazz);
-            Javadoc javadoc = new Javadoc(processingEnv, clazz);
-            type = new DocumentedClass(clazz.getSimpleName().toString(), fullName, isUnit, documentedAnnotations,
-                    javadoc);
-            classes.put(fullName, type);
+        DocumentedClass documentedClass = classes.get(fullName);
+        if (documentedClass == null) {
+            documentedClass = createDocumentedClass(fullName, clazz);
+            classes.put(fullName, documentedClass);
         }
 
-        return type;
+        return documentedClass;
+    }
+
+    private DocumentedClass createDocumentedClass(TypeName fullName, Element clazz) {
+        boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
+        DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(clazz);
+        Javadoc javadoc = new Javadoc(processingEnv, clazz);
+        return new DocumentedClass(clazz.getSimpleName().toString(), fullName, isUnit, documentedAnnotations, javadoc);
     }
 
     public DocumentedDependency documentDependency(Element fieldOrCtorParam) {
+        Element dependencyClass = processingEnv.getTypeUtils().asElement(fieldOrCtorParam.asType());
+        if (EncounteredDependency.isValid(dependencyClass)) {
+            encounteredDependencies.add(new EncounteredDependency(dependencyClass));
+        }
+
         TypeName className = new TypeName(fieldOrCtorParam);
         DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(fieldOrCtorParam);
         Javadoc javadoc = new Javadoc(processingEnv, fieldOrCtorParam);
@@ -87,6 +99,23 @@ public final class Documentation {
         boolean mandatory = !initializer.exists();
         Javadoc javadoc = new Javadoc(processingEnv, field);
         return new DocumentedProperty(name, type, initializer, mandatory, javadoc);
+    }
+
+    public void processEncounteredDependencies() {
+        for (EncounteredDependency encounteredDependency : encounteredDependencies) {
+            TypeName fullName = encounteredDependency.fullName;
+            if (classes.containsKey(fullName)) {
+                continue; // was already documented
+            }
+
+            DocumentedClass documentedClass = createDocumentedClass(fullName, encounteredDependency.clazz);
+            classes.put(fullName, documentedClass);
+        }
+
+        Set<TypeName> allDocumentedClasses = classes.keySet();
+        for (DocumentedClass documentedClass : classes.values()) {
+            documentedClass.markDependenciesThatAreDocumentedAsClasses(allDocumentedClasses);
+        }
     }
 
     // ---
@@ -118,12 +147,12 @@ public final class Documentation {
         }
 
         Mustache template = mustache.compile("class.mustache");
-        for (DocumentedClass type : classes.values()) {
+        for (DocumentedClass documentedClass : classes.values()) {
             FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                    type.fullName + ".html");
+                    documentedClass.fullName + ".html");
             Writer writer = file.openWriter();
             try {
-                template.execute(writer, type);
+                template.execute(writer, documentedClass);
             } finally {
                 writer.close();
             }

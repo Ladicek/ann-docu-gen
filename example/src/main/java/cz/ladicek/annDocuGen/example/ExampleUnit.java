@@ -49,7 +49,7 @@ public class ExampleUnit implements Unit {
     private Optional<String> myOptionalPropertyWithDefaultValue = Optional.of("default value");
 
     @Inject
-    public ExampleUnit(Baz baz, @EnvironmentVariables Map<String, String> environment) {
+    public ExampleUnit(Baz baz, SimpleService simpleService, @EnvironmentVariables Map<String, String> environment) {
     }
 
     @Override

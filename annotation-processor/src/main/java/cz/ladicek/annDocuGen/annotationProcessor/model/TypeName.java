@@ -1,7 +1,6 @@
 package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.type.TypeMirror;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,5 +30,24 @@ public final class TypeName {
         }
         matcher.appendTail(result);
         return result.toString();
+    }
+
+    // ---
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TypeName typeName = (TypeName) o;
+
+        if (!fullyQualifiedName.equals(typeName.fullyQualifiedName)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return fullyQualifiedName.hashCode();
     }
 }

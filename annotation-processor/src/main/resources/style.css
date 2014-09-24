@@ -20,6 +20,11 @@ a:focus {
     color: #05a72e;
 }
 
+a.label:hover,
+a.label:focus {
+    text-decoration: underline;
+}
+
 table.table td a {
     display: block;
     width: auto;

@@ -43,6 +43,10 @@ public class AnnDocuGen extends AbstractProcessor {
                 + roundEnv.getRootElements());
         collectDocumentation(roundEnv, doc);
 
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for additional "
+                + "encountered classes");
+        doc.processEncounteredDependencies();
+
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Documentation collected, generating files");
         doc.generateDocumentationFiles();
 

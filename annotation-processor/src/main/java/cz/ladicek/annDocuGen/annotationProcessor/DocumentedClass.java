@@ -1,19 +1,17 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
-import com.github.mustachejava.Mustache;
-import com.google.common.collect.ImmutableMap;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
+import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public final class DocumentedClass {
     public final String simpleName;
-    public final String fullName;
+    public final TypeName fullName;
     public final DocumentedAnnotations documentedAnnotations;
     public final boolean isUnit; // if it implements (directly or indirectly) the Unit interface
     public final Javadoc javadoc;
@@ -21,7 +19,7 @@ public final class DocumentedClass {
     public final List<DocumentedProperty> properties = new ArrayList<DocumentedProperty>();
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
-    public DocumentedClass(String simpleName, String fullName, boolean isUnit,
+    public DocumentedClass(String simpleName, TypeName fullName, boolean isUnit,
                            DocumentedAnnotations documentedAnnotations, Javadoc javadoc) {
         this.simpleName = simpleName;
         this.fullName = fullName;
@@ -36,6 +34,20 @@ public final class DocumentedClass {
 
     public void addDependency(DocumentedDependency dependency) {
         dependencies.add(dependency);
+    }
+
+    public void markDependenciesThatAreDocumentedAsClasses(Set<TypeName> allDocumentedDependencies) {
+        List<DocumentedDependency> newDependencies = new ArrayList<DocumentedDependency>();
+        for (DocumentedDependency dependency : dependencies) {
+            if (allDocumentedDependencies.contains(dependency.type)) {
+                newDependencies.add(dependency.markAsDocumentedClass());
+            } else {
+                newDependencies.add(dependency);
+            }
+        }
+
+        dependencies.clear();
+        dependencies.addAll(newDependencies);
     }
 
     public static final Comparator<DocumentedClass> SIMPLE_NAME_COMPARATOR = new Comparator<DocumentedClass>() {

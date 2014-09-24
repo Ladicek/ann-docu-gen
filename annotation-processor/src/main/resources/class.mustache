@@ -43,6 +43,7 @@
     <p class="lead">
         <strong>{{type.simpleName}}</strong>
         {{#documentedAnnotations.exist}}<code>{{documentedAnnotations}}</code>{{/documentedAnnotations.exist}}
+        {{#isDocumentedClass}}<a href="{{type}}.html" class="label label-primary">Documented</a>{{/isDocumentedClass}}
     </p>
     {{#javadoc.exists}}
         <div class="well well-sm">{{{javadoc}}}</div>
