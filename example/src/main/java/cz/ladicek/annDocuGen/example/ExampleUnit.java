@@ -48,6 +48,10 @@ public class ExampleUnit implements Unit {
     @Property("my.optional.property.with.default.value")
     private Optional<String> myOptionalPropertyWithDefaultValue = Optional.of("default value");
 
+    /** A property that is initialized to {@code null} explicitly. It should be treated like non-initialized. */
+    @Property("my.property.initialized.to.null")
+    private String myPropertyInitializedToNull = null;
+
     @Inject
     public ExampleUnit(Baz baz, SimpleService simpleService, @EnvironmentVariables Map<String, String> environment) {
     }

@@ -1,6 +1,7 @@
 package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.Trees;
 
@@ -30,6 +31,8 @@ public class CompilerTreeApiBasedFieldInitializerDiscovery implements FieldIniti
         Trees trees = Trees.instance(processingEnv);
         VariableTree fieldNode = (VariableTree) trees.getTree(field);
         ExpressionTree initializer = fieldNode.getInitializer();
-        return new FieldInitializer(initializer != null ? initializer.toString() : null);
+        // if the initializer is "null", it's like it's not initialized at all
+        boolean initializerMissing = initializer == null || initializer.getKind().equals(Tree.Kind.NULL_LITERAL);
+        return new FieldInitializer(initializerMissing ? null : initializer.toString());
     }
 }
