@@ -26,7 +26,7 @@ public final class Javadoc {
 
     @Override
     public String toString() {
-        return value.or("");
+        return renderJavadocTags(value.or(""));
     }
 
     public String firstSentence() {
@@ -34,12 +34,25 @@ public final class Javadoc {
             return "";
         }
 
+        String javadoc = value.get();
+
         BreakIterator boundary = BreakIterator.getSentenceInstance(Locale.US);
-        boundary.setText(value.get());
+        boundary.setText(javadoc);
         int start = boundary.first();
         int end = boundary.next();
 
-        String firstSentence = value.get().substring(start, end);
-        return Jsoup.clean(firstSentence, Whitelist.none());
+        String firstSentence = javadoc.substring(start, end);
+        String cleanedFirstSentence = Jsoup.clean(firstSentence, Whitelist.none());
+        return renderJavadocTags(cleanedFirstSentence);
+    }
+
+    private static String renderJavadocTags(String javadoc) {
+        if (!javadoc.contains("{@")) { // fast path
+            return javadoc;
+        }
+
+        return javadoc
+                .replaceAll("\\{@code (.*?)\\}", "<code>$1</code>")
+                .replaceAll("\\{@literal (.*?)\\}", "$1");
     }
 }

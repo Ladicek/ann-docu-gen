@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import java.util.Map;
 
 /**
- * <p>Example &lt;testing&gt; unit. This is a second sentence.</p>
+ * <p>Example &lt;testing&gt; {@code Unit}. This is a second sentence.</p>
  *
  * <p>This shows most of the valid usecases of {@code AnnDocuGen}.</p>
  */
