@@ -23,8 +23,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -132,6 +135,11 @@ public final class Documentation {
         copyStaticAsset("bootstrap.css");
         copyStaticAsset("style.css");
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+        ImmutableMap<String, Object> staticContext = ImmutableMap.<String, Object>builder()
+                .put("now", dateFormat.format(new Date()))
+                .build();
+
         MustacheFactory mustache = new DefaultMustacheFactory();
 
         {
@@ -140,7 +148,7 @@ public final class Documentation {
                     "index.html");
             Writer writer = file.openWriter();
             try {
-                generateIndex(template, writer);
+                generateIndex(template, writer, staticContext);
             } finally {
                 writer.close();
             }
@@ -152,7 +160,7 @@ public final class Documentation {
                     documentedClass.fullName + ".html");
             Writer writer = file.openWriter();
             try {
-                template.execute(writer, documentedClass);
+                template.execute(writer, new Object[] {documentedClass, staticContext});
             } finally {
                 writer.close();
             }
@@ -171,7 +179,7 @@ public final class Documentation {
         }
     }
 
-    private void generateIndex(Mustache template, Writer out) {
+    private void generateIndex(Mustache template, Writer out, ImmutableMap<String, Object> staticContext) {
         List<DocumentedClass> units = new ArrayList<DocumentedClass>();
         List<DocumentedClass> services = new ArrayList<DocumentedClass>();
         for (DocumentedClass clazz : classes.values()) {
@@ -188,6 +196,7 @@ public final class Documentation {
                 .put("title", "Index")
                 .put("units", units)
                 .put("services", services)
+                .putAll(staticContext)
                 .build();
         template.execute(out, context);
     }
