@@ -134,6 +134,9 @@ public final class Documentation {
     private void doGenerateDocumentationFiles() throws IOException {
         copyStaticAsset("bootstrap.css");
         copyStaticAsset("style.css");
+        copyStaticAsset("jquery.js");
+        copyStaticAsset("underscore.js");
+        copyStaticAsset("index-filter.js");
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         ImmutableMap<String, Object> staticContext = ImmutableMap.<String, Object>builder()

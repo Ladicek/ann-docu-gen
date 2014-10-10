@@ -41,3 +41,12 @@ table.index-table {
 table.index-table td:first-child {
     width: 25%;
 }
+
+#filter-label {
+    font-weight: normal;
+}
+
+#filter {
+    width: 20em;
+    margin-left: 0.5em;
+}
