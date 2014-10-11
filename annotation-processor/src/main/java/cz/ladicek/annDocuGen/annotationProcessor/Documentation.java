@@ -132,10 +132,11 @@ public final class Documentation {
     }
 
     private void doGenerateDocumentationFiles() throws IOException {
-        copyStaticAsset("bootstrap.css");
+        copyStaticAsset("thirdparty/bootstrap.css");
         copyStaticAsset("style.css");
-        copyStaticAsset("jquery.js");
-        copyStaticAsset("underscore.js");
+
+        copyStaticAsset("thirdparty/jquery.js");
+        copyStaticAsset("thirdparty/underscore.js");
         copyStaticAsset("index-filter.js");
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
@@ -170,12 +171,12 @@ public final class Documentation {
         }
     }
 
-    private void copyStaticAsset(String fileName) throws IOException {
+    private void copyStaticAsset(String filePath) throws IOException {
         FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                fileName);
+                filePath);
         OutputStream outputStream = file.openOutputStream();
         try {
-            URL url = Resources.getResource(Documentation.class, "/" + fileName);
+            URL url = Resources.getResource(Documentation.class, "/" + filePath);
             Resources.copy(url, outputStream);
         } finally {
             outputStream.close();
