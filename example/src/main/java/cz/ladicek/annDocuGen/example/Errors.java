@@ -6,19 +6,28 @@ import javax.inject.Inject;
 
 /** Examples of unsupported annotation positions */
 public class Errors {
+    // uncomment this to experience compile-time error checking
+
+/*
     @Inject
     @Property("error.1")
     private String a;
 
-    @Property("error.2")
-    public void b() {
-    }
-
-    @Inject
-    public void c(Baz bar) {
-    }
+    @Property("error 2")
+    private String b;
 
     @Property("error.3")
+    public void c() {
+    }
+*/
+
+    @Inject
+    public void d(Baz bar) {
+    }
+
+/*
+    @Property("error.4")
     public Errors() {
     }
+*/
 }
