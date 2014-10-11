@@ -3,6 +3,7 @@ package cz.ladicek.annDocuGen.annotationProcessor;
 import cz.ladicek.annDocuGen.api.Property;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -21,6 +22,14 @@ import static cz.ladicek.annDocuGen.annotationProcessor.Elements.declaringClassO
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({"javax.inject.Inject", "cz.ladicek.annDocuGen.api.Property"})
 public class DocumentationGenerator extends AbstractProcessor {
+    private Documentation doc;
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        this.doc = new Documentation(processingEnv);
+    }
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
@@ -33,22 +42,20 @@ public class DocumentationGenerator extends AbstractProcessor {
     }
 
     private boolean doProcess(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (annotations.isEmpty()) {
-            return false;
+        if (!annotations.isEmpty()) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for "
+                    + roundEnv.getRootElements());
+            collectDocumentation(roundEnv, doc);
         }
 
-        Documentation doc = new Documentation(processingEnv);
+        if (roundEnv.processingOver()) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for additional "
+                    + "encountered classes");
+            doc.processEncounteredDependencies();
 
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for "
-                + roundEnv.getRootElements());
-        collectDocumentation(roundEnv, doc);
-
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for additional "
-                + "encountered classes");
-        doc.processEncounteredDependencies();
-
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Documentation collected, generating files");
-        doc.generateDocumentationFiles();
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Documentation collected, generating files");
+            doc.generateDocumentationFiles();
+        }
 
         return false;
     }
