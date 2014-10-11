@@ -20,7 +20,7 @@ import static cz.ladicek.annDocuGen.annotationProcessor.Elements.declaringClassO
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes({"javax.inject.Inject", "cz.ladicek.annDocuGen.api.Property"})
-public class AnnDocuGen extends AbstractProcessor {
+public class DocumentationGenerator extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
