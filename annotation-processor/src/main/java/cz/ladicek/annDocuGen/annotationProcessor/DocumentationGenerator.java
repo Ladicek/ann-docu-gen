@@ -13,6 +13,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import java.util.Arrays;
 import java.util.Set;
@@ -61,8 +62,17 @@ public class DocumentationGenerator extends AbstractProcessor {
     }
 
     private void collectDocumentation(RoundEnvironment roundEnv, Documentation doc) {
+        collectUnitClasses(roundEnv, doc);
         collectDocumentationForDependencies(roundEnv, doc);
         collectDocumentationForProperties(roundEnv, doc);
+    }
+
+    private void collectUnitClasses(RoundEnvironment roundEnv, Documentation doc) {
+        for (Element root : roundEnv.getRootElements()) {
+            if (root.getKind() == ElementKind.CLASS) {
+                doc.encounterRootClass(root);
+            }
+        }
     }
 
     private void collectDocumentationForDependencies(RoundEnvironment roundEnv, Documentation doc) {

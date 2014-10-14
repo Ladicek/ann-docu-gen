@@ -6,7 +6,7 @@ import com.github.mustachejava.MustacheFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
-import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredDependency;
+import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializerDiscovery;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
@@ -43,7 +43,7 @@ public final class Documentation {
     private final TypeMirror unitType;
     private final FieldInitializerDiscovery fieldInitializerDiscovery;
     private final Map<TypeName, DocumentedClass> classes = new HashMap<TypeName, DocumentedClass>();
-    private final Set<EncounteredDependency> encounteredDependencies = new HashSet<EncounteredDependency>();
+    private final Set<EncounteredClass> encounteredClasses = new HashSet<EncounteredClass>();
 
     public Documentation(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -65,6 +65,14 @@ public final class Documentation {
         return documentedClass;
     }
 
+    public void encounterRootClass(Element clazz) {
+        // from the root set, only encounter unit classes; services will be encountered later, if they are used
+        boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
+        if (isUnit) {
+            encounteredClasses.add(new EncounteredClass(clazz));
+        }
+    }
+
     private DocumentedClass createDocumentedClass(TypeName fullName, Element clazz) {
         boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
         DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(clazz);
@@ -74,8 +82,8 @@ public final class Documentation {
 
     public DocumentedDependency documentDependency(Element fieldOrCtorParam) {
         Element dependencyClass = processingEnv.getTypeUtils().asElement(fieldOrCtorParam.asType());
-        if (EncounteredDependency.isValid(dependencyClass)) {
-            encounteredDependencies.add(new EncounteredDependency(dependencyClass));
+        if (EncounteredClass.shouldEncounteredDependencyBeDocumented(dependencyClass)) {
+            encounteredClasses.add(new EncounteredClass(dependencyClass));
         }
 
         TypeName className = new TypeName(fieldOrCtorParam);
@@ -105,13 +113,13 @@ public final class Documentation {
     }
 
     public void processEncounteredDependencies() {
-        for (EncounteredDependency encounteredDependency : encounteredDependencies) {
-            TypeName fullName = encounteredDependency.fullName;
+        for (EncounteredClass encounteredClass : encounteredClasses) {
+            TypeName fullName = encounteredClass.fullName;
             if (classes.containsKey(fullName)) {
                 continue; // was already documented
             }
 
-            DocumentedClass documentedClass = createDocumentedClass(fullName, encounteredDependency.clazz);
+            DocumentedClass documentedClass = createDocumentedClass(fullName, encounteredClass.clazz);
             classes.put(fullName, documentedClass);
         }
 

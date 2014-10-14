@@ -2,16 +2,16 @@ package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 import javax.lang.model.element.Element;
 
-public final class EncounteredDependency {
+public final class EncounteredClass {
     public final TypeName fullName;
     public final Element clazz;
 
-    public EncounteredDependency(Element clazz) {
+    public EncounteredClass(Element clazz) {
         this.fullName = new TypeName(clazz);
         this.clazz = clazz;
     }
 
-    public static boolean isValid(Element encounteredClass) {
+    public static boolean shouldEncounteredDependencyBeDocumented(Element encounteredClass) {
         if (encounteredClass == null) {
             return false;
         }
@@ -31,7 +31,7 @@ public final class EncounteredDependency {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        EncounteredDependency that = (EncounteredDependency) o;
+        EncounteredClass that = (EncounteredClass) o;
 
         if (!fullName.equals(that.fullName)) return false;
 
