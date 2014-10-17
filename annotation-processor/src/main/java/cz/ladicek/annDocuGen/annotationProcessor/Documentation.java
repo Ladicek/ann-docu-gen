@@ -3,18 +3,21 @@ package cz.ladicek.annDocuGen.annotationProcessor;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
+import cz.ladicek.annDocuGen.annotationProcessor.model.CompilerBridge;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
-import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializerDiscovery;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
 import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 import cz.ladicek.annDocuGen.api.Property;
+import cz.ladicek.annDocuGen.api.Unit;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -35,22 +38,19 @@ import java.util.Map;
 import java.util.Set;
 
 public final class Documentation {
-    private static final String OPTIONAL_TYPE_FQN = "com.google.common.base.Optional";
-    private static final String UNIT_TYPE_FQN = "cz.ladicek.annDocuGen.api.Unit";
-
     private final ProcessingEnvironment processingEnv;
     private final TypeMirror optionalTypeErased;
     private final TypeMirror unitType;
-    private final FieldInitializerDiscovery fieldInitializerDiscovery;
+    private final CompilerBridge compilerBridge;
     private final Map<TypeName, DocumentedClass> classes = new HashMap<TypeName, DocumentedClass>();
     private final Set<EncounteredClass> encounteredClasses = new HashSet<EncounteredClass>();
 
     public Documentation(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
         this.optionalTypeErased = processingEnv.getTypeUtils().erasure(
-                processingEnv.getElementUtils().getTypeElement(OPTIONAL_TYPE_FQN).asType());
-        this.unitType = processingEnv.getElementUtils().getTypeElement(UNIT_TYPE_FQN).asType();
-        this.fieldInitializerDiscovery = FieldInitializerDiscovery.Factory.create(processingEnv);
+                processingEnv.getElementUtils().getTypeElement(Optional.class.getName()).asType());
+        this.unitType = processingEnv.getElementUtils().getTypeElement(Unit.class.getName()).asType();
+        this.compilerBridge = CompilerBridge.Factory.create(processingEnv);
     }
 
     public DocumentedClass documentClass(Element clazz) {
@@ -67,7 +67,8 @@ public final class Documentation {
 
     public void encounterRootClass(Element clazz) {
         // from the root set, only encounter unit classes; services will be encountered later, if they are used
-        boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
+        boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType)
+                && !clazz.getModifiers().contains(Modifier.ABSTRACT);
         if (isUnit) {
             encounteredClasses.add(new EncounteredClass(clazz));
         }
@@ -82,7 +83,7 @@ public final class Documentation {
 
     public DocumentedDependency documentDependency(Element fieldOrCtorParam) {
         Element dependencyClass = processingEnv.getTypeUtils().asElement(fieldOrCtorParam.asType());
-        if (EncounteredClass.shouldEncounteredDependencyBeDocumented(dependencyClass)) {
+        if (compilerBridge.isSourceAvailable(dependencyClass)) {
             encounteredClasses.add(new EncounteredClass(dependencyClass));
         }
 
@@ -99,7 +100,7 @@ public final class Documentation {
 
         String name = field.getAnnotation(Property.class).value();
         TypeName type = new TypeName(field);
-        FieldInitializer initializer = fieldInitializerDiscovery.getFor(field);
+        FieldInitializer initializer = compilerBridge.getFieldInitializer(field);
         if (!initializer.exists()) {
             if (isOptional) {
                 initializer = FieldInitializer.impliedOptionalAbsent();
@@ -125,7 +126,7 @@ public final class Documentation {
 
         Set<TypeName> allDocumentedClasses = classes.keySet();
         for (DocumentedClass documentedClass : classes.values()) {
-            documentedClass.markDependenciesThatAreDocumentedAsClasses(allDocumentedClasses);
+            documentedClass.markDependenciesThatAreDocumentedClasses(allDocumentedClasses);
         }
     }
 
@@ -156,8 +157,7 @@ public final class Documentation {
 
         {
             Mustache template = mustache.compile("index.mustache");
-            FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                    "index.html");
+            FileObject file = createFileObject("index.html");
             Writer writer = file.openWriter();
             try {
                 generateIndex(template, writer, staticContext);
@@ -168,8 +168,7 @@ public final class Documentation {
 
         Mustache template = mustache.compile("class.mustache");
         for (DocumentedClass documentedClass : classes.values()) {
-            FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                    documentedClass.fullName + ".html");
+            FileObject file = createFileObject(documentedClass.fullName + ".html");
             Writer writer = file.openWriter();
             try {
                 template.execute(writer, new Object[] {documentedClass, staticContext});
@@ -180,8 +179,7 @@ public final class Documentation {
     }
 
     private void copyStaticAsset(String filePath) throws IOException {
-        FileObject file = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen",
-                filePath);
+        FileObject file = createFileObject(filePath);
         OutputStream outputStream = file.openOutputStream();
         try {
             URL url = Resources.getResource(Documentation.class, "/" + filePath);
@@ -189,6 +187,10 @@ public final class Documentation {
         } finally {
             outputStream.close();
         }
+    }
+
+    private FileObject createFileObject(String path) throws IOException {
+        return processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen", path);
     }
 
     private void generateIndex(Mustache template, Writer out, ImmutableMap<String, Object> staticContext) {

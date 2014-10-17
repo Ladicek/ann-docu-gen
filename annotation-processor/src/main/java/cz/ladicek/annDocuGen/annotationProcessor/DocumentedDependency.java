@@ -22,7 +22,7 @@ public final class DocumentedDependency {
         this.isDocumentedClass = isDocumentedClass;
     }
 
-    public DocumentedDependency markAsDocumentedClass() {
+    public DocumentedDependency asDocumentedClass() {
         return new DocumentedDependency(type, documentedAnnotations, javadoc, true);
     }
 }

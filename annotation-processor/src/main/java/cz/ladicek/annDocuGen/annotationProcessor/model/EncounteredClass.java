@@ -11,21 +11,6 @@ public final class EncounteredClass {
         this.clazz = clazz;
     }
 
-    public static boolean shouldEncounteredDependencyBeDocumented(Element encounteredClass) {
-        if (encounteredClass == null) {
-            return false;
-        }
-
-        String fullName = encounteredClass.toString();
-        if (fullName.startsWith("java.") || fullName.startsWith("com.google.")) {
-            return false;
-        }
-
-        return true;
-    }
-
-    // ---
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

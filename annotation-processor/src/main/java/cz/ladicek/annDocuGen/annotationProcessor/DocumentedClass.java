@@ -36,11 +36,11 @@ public final class DocumentedClass {
         dependencies.add(dependency);
     }
 
-    public void markDependenciesThatAreDocumentedAsClasses(Set<TypeName> allDocumentedDependencies) {
+    public void markDependenciesThatAreDocumentedClasses(Set<TypeName> allDocumentedClasses) {
         List<DocumentedDependency> newDependencies = new ArrayList<DocumentedDependency>();
         for (DocumentedDependency dependency : dependencies) {
-            if (allDocumentedDependencies.contains(dependency.type)) {
-                newDependencies.add(dependency.markAsDocumentedClass());
+            if (allDocumentedClasses.contains(dependency.type)) {
+                newDependencies.add(dependency.asDocumentedClass());
             } else {
                 newDependencies.add(dependency);
             }

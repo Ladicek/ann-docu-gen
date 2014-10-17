@@ -9,15 +9,22 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
-public class CompilerTreeApiBasedFieldInitializerDiscovery implements FieldInitializerDiscovery {
+final class CompilerTreeApi implements CompilerBridge {
     private final ProcessingEnvironment processingEnv;
+    private final Trees trees;
 
-    public CompilerTreeApiBasedFieldInitializerDiscovery(ProcessingEnvironment processingEnv) {
+    public CompilerTreeApi(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
+        this.trees = Trees.instance(processingEnv);
     }
 
     @Override
-    public FieldInitializer getFor(Element field) {
+    public boolean isSourceAvailable(Element clazz) {
+        return trees.getTree(clazz) != null;
+    }
+
+    @Override
+    public FieldInitializer getFieldInitializer(Element field) {
         try {
             return doGetFor(field);
         } catch (Exception e) {
@@ -28,7 +35,6 @@ public class CompilerTreeApiBasedFieldInitializerDiscovery implements FieldIniti
     }
 
     private FieldInitializer doGetFor(Element field) {
-        Trees trees = Trees.instance(processingEnv);
         VariableTree fieldNode = (VariableTree) trees.getTree(field);
         ExpressionTree initializer = fieldNode.getInitializer();
         // if the initializer is "null", it's like it's not initialized at all
