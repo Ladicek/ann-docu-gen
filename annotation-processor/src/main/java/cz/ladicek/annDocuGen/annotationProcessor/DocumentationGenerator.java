@@ -47,13 +47,13 @@ public class DocumentationGenerator extends AbstractProcessor {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for "
                     + roundEnv.getRootElements());
             collectDocumentation(roundEnv, doc);
-        }
 
-        if (roundEnv.processingOver()) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Collecting documentation for additional "
                     + "encountered classes");
             doc.processEncounteredDependencies();
+        }
 
+        if (roundEnv.processingOver()) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Documentation collected, generating files");
             doc.generateDocumentationFiles();
         }
