@@ -24,6 +24,7 @@
 
         <!-- All versions. Keep in alphabetical order. Name format: version.${groupId}[.${artifactId}]. -->
         <version.com.github.spullara.mustache.java>0.8.16</version.com.github.spullara.mustache.java>
+        <version.com.google.code.gson>2.3</version.com.google.code.gson>
         <version.com.google.guava>18.0</version.com.google.guava>
         <version.javax.inject>1</version.javax.inject>
         <version.org.apache.maven.plugin.maven-compiler-plugin>3.1</version.org.apache.maven.plugin.maven-compiler-plugin>
@@ -74,6 +75,11 @@
                         <artifactId>jruby</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${version.com.google.code.gson}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>

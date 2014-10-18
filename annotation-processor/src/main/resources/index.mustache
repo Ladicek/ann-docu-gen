@@ -6,15 +6,13 @@
     <link rel="stylesheet" href="thirdparty/bootstrap.css">
     <link rel="stylesheet" href="style.css">
     <script src="thirdparty/jquery.js" defer></script>
-    <script src="thirdparty/underscore.js" defer></script>
-    <script src="index-filter.js" defer></script>
+    <script src="thirdparty/typeahead.js" defer></script>
+    <script src="index-search.js" defer></script>
 </head>
 <body>
 <h1>{{title}}</h1>
 
-<label id="filter-label">
-    Filter: <input type="search" id="filter" results>
-</label>
+<input id="search" class="typeahead" placeholder="Search..." autocomplete="off" spellcheck="false" disabled>
 
 <h2>Units</h2>
 

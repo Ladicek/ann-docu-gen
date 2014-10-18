@@ -6,11 +6,13 @@ import com.github.mustachejava.MustacheFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
+import com.google.gson.GsonBuilder;
 import cz.ladicek.annDocuGen.annotationProcessor.model.CompilerBridge;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
+import cz.ladicek.annDocuGen.annotationProcessor.model.SearchData;
 import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 import cz.ladicek.annDocuGen.api.Property;
 import cz.ladicek.annDocuGen.api.Unit;
@@ -147,8 +149,8 @@ public final class Documentation {
         copyStaticAsset("style.css");
 
         copyStaticAsset("thirdparty/jquery.js");
-        copyStaticAsset("thirdparty/underscore.js");
-        copyStaticAsset("index-filter.js");
+        copyStaticAsset("thirdparty/typeahead.js");
+        copyStaticAsset("index-search.js");
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         ImmutableMap<String, Object> staticContext = ImmutableMap.<String, Object>builder()
@@ -177,6 +179,11 @@ public final class Documentation {
             } finally {
                 writer.close();
             }
+        }
+
+        {
+            FileObject file = createFileObject("search.json");
+            generateSearchData(file);
         }
     }
 
@@ -215,5 +222,19 @@ public final class Documentation {
                 .putAll(staticContext)
                 .build();
         template.execute(out, context);
+    }
+
+    private void generateSearchData(FileObject file) throws IOException {
+        List<SearchData> searchData = new ArrayList<SearchData>();
+        for (DocumentedClass documentedClass : classes.values()) {
+            searchData.add(new SearchData(documentedClass));
+        }
+
+        Writer writer = file.openWriter();
+        try {
+            new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(searchData, writer);
+        } finally {
+            writer.close();
+        }
     }
 }

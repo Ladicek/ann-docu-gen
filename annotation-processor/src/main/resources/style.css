@@ -42,11 +42,58 @@ table.index-table td:first-child {
     width: 25%;
 }
 
-#filter-label {
-    font-weight: normal;
+#search, .tt-hint {
+    width: 574px;
+    height: 40px;
+    padding: 8px 12px;
+    font-size: 24px;
+    line-height: 30px;
+    border: 1px solid #024e6a;
+    outline: none;
 }
 
-#filter {
-    width: 20em;
-    margin-left: 0.5em;
+.tt-hint {
+    color: #999
+}
+
+.tt-dropdown-menu {
+    width: 574px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+
+.tt-suggestion {
+    padding: 8px 20px;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.tt-suggestion + .tt-suggestion {
+    font-size: 14px;
+    border-top: 1px solid #ccc;
+}
+
+.tt-suggestions .search-result-type {
+    float: right;
+    font-style: italic;
+}
+
+.tt-suggestions .search-result-name {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.tt-suggestions .search-result-description {
+    margin: 0;
+}
+
+.tt-suggestions .tt-cursor {
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.tt-highlight {
+    color: #25c74e;
+    background-color: #f2f9f4;
 }
