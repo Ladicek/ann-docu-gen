@@ -27,7 +27,7 @@
         <version.com.google.code.gson>2.3</version.com.google.code.gson>
         <version.com.google.guava>18.0</version.com.google.guava>
         <version.javax.inject>1</version.javax.inject>
-        <version.org.apache.maven.plugin.maven-compiler-plugin>3.1</version.org.apache.maven.plugin.maven-compiler-plugin>
+        <version.org.apache.maven.plugins.maven-compiler-plugin>3.2</version.org.apache.maven.plugins.maven-compiler-plugin>
         <version.org.jsoup>1.7.3</version.org.jsoup>
     </properties>
 
@@ -112,7 +112,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${version.org.apache.maven.plugin.maven-compiler-plugin}</version>
+                    <version>${version.org.apache.maven.plugins.maven-compiler-plugin}</version>
                     <configuration>
                         <source>${version.java}</source>
                         <target>${version.java}</target>
