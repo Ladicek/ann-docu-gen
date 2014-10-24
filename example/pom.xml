@@ -31,4 +31,13 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>cz.ladicek.annDocuGen</groupId>
+                <artifactId>ann-docu-gen-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
