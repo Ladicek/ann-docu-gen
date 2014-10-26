@@ -16,6 +16,10 @@
 
 <h2>Units</h2>
 
+{{^units}}
+    <p><em>None</em></p>
+{{/units}}
+
 <table class="table table-striped table-condensed table-hover index-table">
 {{#units}}
     <tr data-filtered>
@@ -26,6 +30,10 @@
 </table>
 
 <h2>Services</h2>
+
+{{^services}}
+    <p><em>None</em></p>
+{{/services}}
 
 <table class="table table-striped table-condensed table-hover index-table">
     {{#services}}
