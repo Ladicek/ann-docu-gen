@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 public final class DocumentedClass {
+    public final boolean isPublic;
+    public final boolean isAbstract;
     public final String simpleName;
     public final TypeName fullName;
     public final DocumentedAnnotations documentedAnnotations;
@@ -15,12 +17,14 @@ public final class DocumentedClass {
     public final List<DocumentedProperty> properties = new ArrayList<DocumentedProperty>();
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
-    public DocumentedClass(String simpleName, TypeName fullName, boolean isUnit,
-                           DocumentedAnnotations documentedAnnotations, Javadoc javadoc) {
+    public DocumentedClass(boolean isPublic, boolean isAbstract, String simpleName, TypeName fullName,
+                           DocumentedAnnotations documentedAnnotations, boolean isUnit, Javadoc javadoc) {
+        this.isPublic = isPublic;
+        this.isAbstract = isAbstract;
         this.simpleName = simpleName;
         this.fullName = fullName;
-        this.isUnit = isUnit;
         this.documentedAnnotations = documentedAnnotations;
+        this.isUnit = isUnit;
         this.javadoc = javadoc;
     }
 

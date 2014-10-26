@@ -15,13 +15,21 @@ public final class DocumentationDataView {
     public DocumentationDataView(DocumentationData documentationData) {
         Set<TypeName> allDocumentedClasses = new HashSet<TypeName>();
         for (DocumentedClass documentedClass : documentationData.documentedClasses()) {
-            allDocumentedClasses.add(documentedClass.fullName);
+            if (visibleInDocumentation(documentedClass)) {
+                allDocumentedClasses.add(documentedClass.fullName);
+            }
         }
 
         this.documentedClassViews = new ArrayList<DocumentedClassView>();
         for (DocumentedClass documentedClass : documentationData.documentedClasses()) {
-            documentedClassViews.add(new DocumentedClassView(documentedClass, allDocumentedClasses));
+            if (visibleInDocumentation(documentedClass)) {
+                documentedClassViews.add(new DocumentedClassView(documentedClass, allDocumentedClasses));
+            }
         }
+    }
+
+    private static boolean visibleInDocumentation(DocumentedClass clazz) {
+        return clazz.isPublic && !clazz.isAbstract;
     }
 
     public List<DocumentedClassView> documentedClasses() {

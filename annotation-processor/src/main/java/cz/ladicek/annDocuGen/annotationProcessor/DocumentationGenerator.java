@@ -62,12 +62,12 @@ public class DocumentationGenerator extends AbstractProcessor {
     }
 
     private void collectDocumentation(RoundEnvironment roundEnv, Documentation doc) {
-        collectUnitClasses(roundEnv, doc);
+        encounterRootClasses(roundEnv, doc);
         collectDocumentationForDependencies(roundEnv, doc);
         collectDocumentationForProperties(roundEnv, doc);
     }
 
-    private void collectUnitClasses(RoundEnvironment roundEnv, Documentation doc) {
+    private void encounterRootClasses(RoundEnvironment roundEnv, Documentation doc) {
         for (Element root : roundEnv.getRootElements()) {
             if (root.getKind() == ElementKind.CLASS) {
                 doc.encounterRootClass(root);

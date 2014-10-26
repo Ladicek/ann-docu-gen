@@ -62,18 +62,23 @@ public final class Documentation {
 
     public void encounterRootClass(Element clazz) {
         // from the root set, only encounter unit classes; services will be encountered later, if they are used
-        boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType)
-                && !clazz.getModifiers().contains(Modifier.ABSTRACT);
-        if (isUnit) {
+        if (isUnit(clazz)) {
             encounteredClasses.add(new EncounteredClass(clazz));
         }
     }
 
+    private boolean isUnit(Element clazz) {
+        return processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
+    }
+
     private DocumentedClass createDocumentedClass(TypeName fullName, Element clazz) {
-        boolean isUnit = processingEnv.getTypeUtils().isAssignable(clazz.asType(), unitType);
+        boolean isPublic = clazz.getModifiers().contains(Modifier.PUBLIC);
+        boolean isAbstract = clazz.getModifiers().contains(Modifier.ABSTRACT);
         DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(clazz);
+        boolean isUnit = isUnit(clazz);
         Javadoc javadoc = new Javadoc(processingEnv, clazz);
-        return new DocumentedClass(clazz.getSimpleName().toString(), fullName, isUnit, documentedAnnotations, javadoc);
+        return new DocumentedClass(isPublic, isAbstract, clazz.getSimpleName().toString(), fullName,
+                documentedAnnotations, isUnit, javadoc);
     }
 
     public DocumentedDependency documentDependency(Element fieldOrCtorParam) {
