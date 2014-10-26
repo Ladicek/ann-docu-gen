@@ -1,5 +1,7 @@
 package cz.ladicek.annDocuGen.annotationProcessor.model;
 
+import com.google.common.base.Optional;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,6 +13,7 @@ public final class DocumentedClass {
     public final String simpleName;
     public final TypeName fullName;
     public final DocumentedAnnotations documentedAnnotations;
+    public final Optional<TypeName> parent; // absent if the parent is java.lang.Object
     public final boolean isUnit; // if it implements (directly or indirectly) the Unit interface
     public final Javadoc javadoc;
 
@@ -18,12 +21,14 @@ public final class DocumentedClass {
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
     public DocumentedClass(boolean isPublic, boolean isAbstract, String simpleName, TypeName fullName,
-                           DocumentedAnnotations documentedAnnotations, boolean isUnit, Javadoc javadoc) {
+                           DocumentedAnnotations documentedAnnotations, Optional<TypeName> parent, boolean isUnit,
+                           Javadoc javadoc) {
         this.isPublic = isPublic;
         this.isAbstract = isAbstract;
         this.simpleName = simpleName;
         this.fullName = fullName;
         this.documentedAnnotations = documentedAnnotations;
+        this.parent = parent;
         this.isUnit = isUnit;
         this.javadoc = javadoc;
     }

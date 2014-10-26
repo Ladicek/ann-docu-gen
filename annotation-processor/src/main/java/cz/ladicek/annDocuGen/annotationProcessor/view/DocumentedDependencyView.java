@@ -8,10 +8,13 @@ import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 public final class DocumentedDependencyView {
     private final DocumentedDependency documentedDependency;
     public final boolean isDocumentedClass;
+    public final boolean isInherited;
 
-    DocumentedDependencyView(DocumentedDependency documentedDependency, boolean isDocumentedClass) {
+    DocumentedDependencyView(DocumentedDependency documentedDependency, boolean isDocumentedClass,
+                             boolean isInherited) {
         this.documentedDependency = documentedDependency;
         this.isDocumentedClass = isDocumentedClass;
+        this.isInherited = isInherited;
     }
 
     public TypeName type() {

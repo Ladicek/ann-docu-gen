@@ -28,6 +28,7 @@
         <strong>{{name}}</strong>: <code>{{type.simpleName}}</code>
         {{#initializer.exists}}= <code>{{initializer}}</code>{{/initializer.exists}}
         {{#mandatory}}<span class="label label-danger">Mandatory</span>{{/mandatory}}
+        {{#isInherited}}<span class="label label-default">Inherited</span>{{/isInherited}}
     </p>
     {{#javadoc.exists}}
         <div class="well well-sm">{{{javadoc}}}</div>
@@ -44,6 +45,7 @@
         <strong>{{type.simpleName}}</strong>
         {{#documentedAnnotations.exist}}<code>{{documentedAnnotations}}</code>{{/documentedAnnotations.exist}}
         {{#isDocumentedClass}}<a href="{{type}}.html" class="label label-primary">Documented</a>{{/isDocumentedClass}}
+        {{#isInherited}}<span class="label label-default">Inherited</span>{{/isInherited}}
     </p>
     {{#javadoc.exists}}
         <div class="well well-sm">{{{javadoc}}}</div>

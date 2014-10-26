@@ -14,13 +14,21 @@ import java.util.Set;
 
 public final class DocumentedClassView {
     private final DocumentedClass documentedClass;
+    public final List<DocumentedPropertyView> properties = new ArrayList<DocumentedPropertyView>();
     public final List<DocumentedDependencyView> dependencies = new ArrayList<DocumentedDependencyView>();
 
-    public DocumentedClassView(DocumentedClass documentedClass, Set<TypeName> allDocumentedClasses) {
+    DocumentedClassView(DocumentedClass documentedClass, Set<TypeName> allDocumentedClasses,
+                        List<DocumentedClass> inheritanceChain) {
         this.documentedClass = documentedClass;
-        for (DocumentedDependency dependency : documentedClass.dependencies) {
-            boolean isDocumented = allDocumentedClasses.contains(dependency.type);
-            dependencies.add(new DocumentedDependencyView(dependency, isDocumented));
+        for (DocumentedClass clazz : inheritanceChain) {
+            boolean isInherited = !documentedClass.fullName.equals(clazz.fullName);
+            for (DocumentedProperty property : clazz.properties) {
+                properties.add(new DocumentedPropertyView(property, isInherited));
+            }
+            for (DocumentedDependency dependency : clazz.dependencies) {
+                boolean isDocumented = allDocumentedClasses.contains(dependency.type);
+                dependencies.add(new DocumentedDependencyView(dependency, isDocumented, isInherited));
+            }
         }
     }
 
@@ -42,10 +50,6 @@ public final class DocumentedClassView {
 
     public Javadoc javadoc() {
         return documentedClass.javadoc;
-    }
-
-    public List<DocumentedProperty> properties() {
-        return documentedClass.properties;
     }
 
     // ---

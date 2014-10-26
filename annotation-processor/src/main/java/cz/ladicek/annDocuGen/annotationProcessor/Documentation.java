@@ -29,6 +29,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +37,7 @@ public final class Documentation {
     private final ProcessingEnvironment processingEnv;
     private final TypeMirror optionalTypeErased;
     private final TypeMirror unitType;
+    private final TypeMirror objectType;
     private final CompilerBridge compilerBridge;
     private final Map<TypeName, DocumentedClass> classes = new HashMap<TypeName, DocumentedClass>();
     private final Set<EncounteredClass> encounteredClasses = new HashSet<EncounteredClass>();
@@ -45,6 +47,7 @@ public final class Documentation {
         this.optionalTypeErased = processingEnv.getTypeUtils().erasure(
                 processingEnv.getElementUtils().getTypeElement(Optional.class.getName()).asType());
         this.unitType = processingEnv.getElementUtils().getTypeElement(Unit.class.getName()).asType();
+        this.objectType = processingEnv.getElementUtils().getTypeElement(Object.class.getName()).asType();
         this.compilerBridge = CompilerBridge.Factory.create(processingEnv);
     }
 
@@ -72,13 +75,22 @@ public final class Documentation {
     }
 
     private DocumentedClass createDocumentedClass(TypeName fullName, Element clazz) {
+        Optional<TypeName> parentClass = Optional.absent();
+        List<? extends TypeMirror> superTypes = processingEnv.getTypeUtils().directSupertypes(clazz.asType());
+        if (!superTypes.isEmpty()) {
+            TypeMirror superClass = superTypes.get(0);
+            if (!processingEnv.getTypeUtils().isSameType(superClass, objectType)) {
+                parentClass = Optional.of(new TypeName(processingEnv.getTypeUtils().asElement(superClass)));
+            }
+        }
+
         boolean isPublic = clazz.getModifiers().contains(Modifier.PUBLIC);
         boolean isAbstract = clazz.getModifiers().contains(Modifier.ABSTRACT);
         DocumentedAnnotations documentedAnnotations = new DocumentedAnnotations(clazz);
         boolean isUnit = isUnit(clazz);
         Javadoc javadoc = new Javadoc(processingEnv, clazz);
         return new DocumentedClass(isPublic, isAbstract, clazz.getSimpleName().toString(), fullName,
-                documentedAnnotations, isUnit, javadoc);
+                documentedAnnotations, parentClass, isUnit, javadoc);
     }
 
     public DocumentedDependency documentDependency(Element fieldOrCtorParam) {
