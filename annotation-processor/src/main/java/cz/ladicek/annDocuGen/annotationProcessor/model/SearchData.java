@@ -2,7 +2,6 @@ package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
-import cz.ladicek.annDocuGen.annotationProcessor.DocumentedClass;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 

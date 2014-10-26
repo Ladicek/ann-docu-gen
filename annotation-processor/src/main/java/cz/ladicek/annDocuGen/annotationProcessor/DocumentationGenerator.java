@@ -1,5 +1,6 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedClass;
 import cz.ladicek.annDocuGen.api.Property;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -13,7 +14,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import java.util.Arrays;
 import java.util.Set;

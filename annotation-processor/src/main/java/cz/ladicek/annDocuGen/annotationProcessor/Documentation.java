@@ -2,7 +2,11 @@ package cz.ladicek.annDocuGen.annotationProcessor;
 
 import com.google.common.base.Optional;
 import cz.ladicek.annDocuGen.annotationProcessor.model.CompilerBridge;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentationData;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedClass;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedDependency;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedProperty;
 import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;

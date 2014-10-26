@@ -1,8 +1,4 @@
-package cz.ladicek.annDocuGen.annotationProcessor;
-
-import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
-import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
-import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
+package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 public final class DocumentedProperty {
     public final String name; // value of the @Property annotation

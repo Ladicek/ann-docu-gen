@@ -1,4 +1,4 @@
-package cz.ladicek.annDocuGen.annotationProcessor;
+package cz.ladicek.annDocuGen.annotationProcessor.model;
 
 import java.util.List;
 

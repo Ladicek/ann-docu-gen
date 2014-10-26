@@ -6,8 +6,8 @@ import com.github.mustachejava.MustacheFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.gson.GsonBuilder;
-import cz.ladicek.annDocuGen.annotationProcessor.DocumentationData;
-import cz.ladicek.annDocuGen.annotationProcessor.DocumentedClass;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentationData;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.SearchData;
 
 import java.io.IOException;
