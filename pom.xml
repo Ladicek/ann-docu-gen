@@ -12,6 +12,7 @@
     <modules>
         <module>annotation-processor</module>
         <module>example</module>
+        <module>example2</module>
         <module>framework</module>
         <module>maven-plugin</module>
     </modules>
@@ -46,7 +47,12 @@
             </dependency>
             <dependency>
                 <groupId>cz.ladicek.annDocuGen</groupId>
-                <artifactId>ann-docu-gen-examle</artifactId>
+                <artifactId>ann-docu-gen-example</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cz.ladicek.annDocuGen</groupId>
+                <artifactId>ann-docu-gen-example2</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
