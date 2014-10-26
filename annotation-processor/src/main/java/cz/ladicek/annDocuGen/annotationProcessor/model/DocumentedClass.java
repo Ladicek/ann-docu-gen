@@ -31,25 +31,4 @@ public final class DocumentedClass {
     public void addDependency(DocumentedDependency dependency) {
         dependencies.add(dependency);
     }
-
-    public void markDependenciesThatAreDocumentedClasses(Set<TypeName> allDocumentedClasses) {
-        List<DocumentedDependency> newDependencies = new ArrayList<DocumentedDependency>();
-        for (DocumentedDependency dependency : dependencies) {
-            if (allDocumentedClasses.contains(dependency.type)) {
-                newDependencies.add(dependency.asDocumentedClass());
-            } else {
-                newDependencies.add(dependency);
-            }
-        }
-
-        dependencies.clear();
-        dependencies.addAll(newDependencies);
-    }
-
-    public static final Comparator<DocumentedClass> SIMPLE_NAME_COMPARATOR = new Comparator<DocumentedClass>() {
-        @Override
-        public int compare(DocumentedClass o1, DocumentedClass o2) {
-            return o1.simpleName.compareTo(o2.simpleName);
-        }
-    };
 }

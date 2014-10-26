@@ -120,11 +120,6 @@ public final class Documentation {
         }
 
         encounteredClasses.clear();
-
-        Set<TypeName> allDocumentedClasses = classes.keySet();
-        for (DocumentedClass documentedClass : classes.values()) {
-            documentedClass.markDependenciesThatAreDocumentedClasses(allDocumentedClasses);
-        }
     }
 
     // ---

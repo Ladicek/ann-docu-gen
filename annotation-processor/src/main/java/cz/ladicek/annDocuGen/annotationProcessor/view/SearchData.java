@@ -1,4 +1,4 @@
-package cz.ladicek.annDocuGen.annotationProcessor.model;
+package cz.ladicek.annDocuGen.annotationProcessor.view;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
@@ -14,15 +14,15 @@ public final class SearchData {
     private final String fqn;
     private final List<String> tokens;
 
-    public SearchData(DocumentedClass documentedClass) {
-        this.name = documentedClass.simpleName;
-        this.type = documentedClass.isUnit ? "Unit" : "Service";
-        this.description = Jsoup.clean(documentedClass.javadoc.firstSentence(), Whitelist.none());
-        this.fqn = documentedClass.fullName.toString();
+    public SearchData(DocumentedClassView documentedClassView) {
+        this.name = documentedClassView.simpleName();
+        this.type = documentedClassView.isUnit() ? "Unit" : "Service";
+        this.description = Jsoup.clean(documentedClassView.javadoc().firstSentence(), Whitelist.none());
+        this.fqn = documentedClassView.fullName().toString();
         this.tokens = Splitter
                 .on(CharMatcher.JAVA_LETTER_OR_DIGIT.or(CharMatcher.is('\'')).negate()) // "'" is common in English
                 .trimResults()
                 .omitEmptyStrings()
-                .splitToList(name + " " + Jsoup.clean(documentedClass.javadoc.toString(), Whitelist.none()));
+                .splitToList(name + " " + Jsoup.clean(documentedClassView.javadoc().toString(), Whitelist.none()));
     }
 }

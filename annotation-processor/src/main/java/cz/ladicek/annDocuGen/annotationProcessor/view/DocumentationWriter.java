@@ -7,8 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.gson.GsonBuilder;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentationData;
-import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedClass;
-import cz.ladicek.annDocuGen.annotationProcessor.model.SearchData;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -22,11 +20,11 @@ import java.util.Date;
 import java.util.List;
 
 public class DocumentationWriter {
-    private final DocumentationData documentationData;
+    private final DocumentationDataView documentationDataView;
     private final FileCreator fileCreator;
 
     public DocumentationWriter(DocumentationData documentationData, FileCreator fileCreator) {
-        this.documentationData = documentationData;
+        this.documentationDataView = new DocumentationDataView(documentationData);
         this.fileCreator = fileCreator;
     }
 
@@ -56,8 +54,8 @@ public class DocumentationWriter {
         }
 
         Mustache template = mustache.compile("class.mustache");
-        for (DocumentedClass documentedClass : documentationData.documentedClasses()) {
-            Writer writer = fileCreator.newWriter(documentedClass.fullName + ".html");
+        for (DocumentedClassView documentedClass : documentationDataView.documentedClasses()) {
+            Writer writer = fileCreator.newWriter(documentedClass.fullName() + ".html");
             try {
                 template.execute(writer, new Object[] {documentedClass, staticContext});
             } finally {
@@ -79,17 +77,17 @@ public class DocumentationWriter {
     }
 
     private void generateIndex(Mustache template, Writer out, ImmutableMap<String, Object> staticContext) {
-        List<DocumentedClass> units = new ArrayList<DocumentedClass>();
-        List<DocumentedClass> services = new ArrayList<DocumentedClass>();
-        for (DocumentedClass clazz : documentationData.documentedClasses()) {
-            if (clazz.isUnit) {
+        List<DocumentedClassView> units = new ArrayList<DocumentedClassView>();
+        List<DocumentedClassView> services = new ArrayList<DocumentedClassView>();
+        for (DocumentedClassView clazz : documentationDataView.documentedClasses()) {
+            if (clazz.isUnit()) {
                 units.add(clazz);
             } else {
                 services.add(clazz);
             }
         }
-        Collections.sort(units, DocumentedClass.SIMPLE_NAME_COMPARATOR);
-        Collections.sort(services, DocumentedClass.SIMPLE_NAME_COMPARATOR);
+        Collections.sort(units, DocumentedClassView.SIMPLE_NAME_COMPARATOR);
+        Collections.sort(services, DocumentedClassView.SIMPLE_NAME_COMPARATOR);
 
         ImmutableMap<String, Object> context = ImmutableMap.<String, Object>builder()
                 .put("title", "Index")
@@ -102,8 +100,8 @@ public class DocumentationWriter {
 
     private void generateSearchData() throws IOException {
         List<SearchData> searchData = new ArrayList<SearchData>();
-        for (DocumentedClass documentedClass : documentationData.documentedClasses()) {
-            searchData.add(new SearchData(documentedClass));
+        for (DocumentedClassView documentedClassView : documentationDataView.documentedClasses()) {
+            searchData.add(new SearchData(documentedClassView));
         }
 
         Writer writer = fileCreator.newWriter("search.json");
