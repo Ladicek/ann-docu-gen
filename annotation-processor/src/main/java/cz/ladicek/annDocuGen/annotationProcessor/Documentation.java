@@ -1,19 +1,14 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Resources;
-import com.google.gson.GsonBuilder;
 import cz.ladicek.annDocuGen.annotationProcessor.model.CompilerBridge;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
-import cz.ladicek.annDocuGen.annotationProcessor.model.SearchData;
 import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
+import cz.ladicek.annDocuGen.annotationProcessor.view.DocumentationWriter;
+import cz.ladicek.annDocuGen.annotationProcessor.view.FileCreator;
 import cz.ladicek.annDocuGen.api.Property;
 import cz.ladicek.annDocuGen.api.Unit;
 
@@ -27,15 +22,9 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -138,103 +127,27 @@ public final class Documentation {
 
     public void generateDocumentationFiles() {
         try {
-            doGenerateDocumentationFiles();
+            DocumentationData data = new DocumentationData(new ArrayList<DocumentedClass>(classes.values()));
+            FileCreator fileCreator = new AnnotationProcessorFileCreator();
+            new DocumentationWriter(data, fileCreator).write();
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "IO problem: " + e);
         }
     }
 
-    private void doGenerateDocumentationFiles() throws IOException {
-        copyStaticAsset("thirdparty/bootstrap.css");
-        copyStaticAsset("style.css");
-
-        copyStaticAsset("thirdparty/jquery.js");
-        copyStaticAsset("thirdparty/typeahead.js");
-        copyStaticAsset("index-search.js");
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-        ImmutableMap<String, Object> staticContext = ImmutableMap.<String, Object>builder()
-                .put("now", dateFormat.format(new Date()))
-                .build();
-
-        MustacheFactory mustache = new DefaultMustacheFactory();
-
-        {
-            Mustache template = mustache.compile("index.mustache");
-            FileObject file = createFileObject("index.html");
-            Writer writer = file.openWriter();
-            try {
-                generateIndex(template, writer, staticContext);
-            } finally {
-                writer.close();
-            }
+    private final class AnnotationProcessorFileCreator implements FileCreator {
+        @Override
+        public OutputStream newOutputStream(String path) throws IOException {
+            return createFileObject(path).openOutputStream();
         }
 
-        Mustache template = mustache.compile("class.mustache");
-        for (DocumentedClass documentedClass : classes.values()) {
-            FileObject file = createFileObject(documentedClass.fullName + ".html");
-            Writer writer = file.openWriter();
-            try {
-                template.execute(writer, new Object[] {documentedClass, staticContext});
-            } finally {
-                writer.close();
-            }
+        @Override
+        public Writer newWriter(String path) throws IOException {
+            return createFileObject(path).openWriter();
         }
 
-        {
-            FileObject file = createFileObject("search.json");
-            generateSearchData(file);
-        }
-    }
-
-    private void copyStaticAsset(String filePath) throws IOException {
-        FileObject file = createFileObject(filePath);
-        OutputStream outputStream = file.openOutputStream();
-        try {
-            URL url = Resources.getResource(Documentation.class, "/" + filePath);
-            Resources.copy(url, outputStream);
-        } finally {
-            outputStream.close();
-        }
-    }
-
-    private FileObject createFileObject(String path) throws IOException {
-        return processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen", path);
-    }
-
-    private void generateIndex(Mustache template, Writer out, ImmutableMap<String, Object> staticContext) {
-        List<DocumentedClass> units = new ArrayList<DocumentedClass>();
-        List<DocumentedClass> services = new ArrayList<DocumentedClass>();
-        for (DocumentedClass clazz : classes.values()) {
-            if (clazz.isUnit) {
-                units.add(clazz);
-            } else {
-                services.add(clazz);
-            }
-        }
-        Collections.sort(units, DocumentedClass.SIMPLE_NAME_COMPARATOR);
-        Collections.sort(services, DocumentedClass.SIMPLE_NAME_COMPARATOR);
-
-        ImmutableMap<String, Object> context = ImmutableMap.<String, Object>builder()
-                .put("title", "Index")
-                .put("units", units)
-                .put("services", services)
-                .putAll(staticContext)
-                .build();
-        template.execute(out, context);
-    }
-
-    private void generateSearchData(FileObject file) throws IOException {
-        List<SearchData> searchData = new ArrayList<SearchData>();
-        for (DocumentedClass documentedClass : classes.values()) {
-            searchData.add(new SearchData(documentedClass));
-        }
-
-        Writer writer = file.openWriter();
-        try {
-            new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(searchData, writer);
-        } finally {
-            writer.close();
+        private FileObject createFileObject(String path) throws IOException {
+            return processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "annDocuGen", path);
         }
     }
 }
