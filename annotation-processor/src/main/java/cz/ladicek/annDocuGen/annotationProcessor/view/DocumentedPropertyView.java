@@ -6,31 +6,31 @@ import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
 import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 
 public class DocumentedPropertyView {
-    private final DocumentedProperty documentedProperty;
+    private final DocumentedProperty delegate;
     public final boolean isInherited;
 
-    DocumentedPropertyView(DocumentedProperty documentedProperty, boolean isInherited) {
-        this.documentedProperty = documentedProperty;
+    DocumentedPropertyView(DocumentedProperty delegate, boolean isInherited) {
+        this.delegate = delegate;
         this.isInherited = isInherited;
     }
 
     public String name() {
-        return documentedProperty.name;
+        return delegate.name;
     }
 
     public TypeName type() {
-        return documentedProperty.type;
+        return delegate.type;
     }
 
     public FieldInitializer initializer() {
-        return documentedProperty.initializer;
+        return delegate.initializer;
     }
 
     public boolean mandatory() {
-        return documentedProperty.mandatory;
+        return delegate.mandatory;
     }
 
     public Javadoc javadoc() {
-        return documentedProperty.javadoc;
+        return delegate.javadoc;
     }
 }

@@ -5,7 +5,8 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
+import cz.ladicek.annDocuGen.annotationProcessor.gson.GsonHolder;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentationData;
 
 import java.io.IOException;
@@ -20,12 +21,16 @@ import java.util.Date;
 import java.util.List;
 
 public class DocumentationWriter {
+    private final DocumentationData documentationData;
     private final DocumentationDataView documentationDataView;
     private final FileCreator fileCreator;
+    private final Gson gson;
 
     public DocumentationWriter(DocumentationData documentationData, FileCreator fileCreator) {
+        this.documentationData = documentationData;
         this.documentationDataView = new DocumentationDataView(documentationData);
         this.fileCreator = fileCreator;
+        this.gson = GsonHolder.instance;
     }
 
     public void write() throws IOException {
@@ -64,6 +69,8 @@ public class DocumentationWriter {
         }
 
         generateSearchData();
+
+        generateData();
     }
 
     private void copyStaticAsset(String filePath) throws IOException {
@@ -106,7 +113,23 @@ public class DocumentationWriter {
 
         Writer writer = fileCreator.newWriter("search.json");
         try {
-            new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(searchData, writer);
+            gson.toJson(searchData, writer);
+        } finally {
+            writer.close();
+        }
+    }
+
+    private void generateData() throws IOException {
+        Writer writer = fileCreator.newWriter("data.json");
+        try {
+            gson.toJson(documentationDataView, writer);
+        } finally {
+            writer.close();
+        }
+
+        writer = fileCreator.newWriter("raw-data.json");
+        try {
+            gson.toJson(documentationData, writer);
         } finally {
             writer.close();
         }

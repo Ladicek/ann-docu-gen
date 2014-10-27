@@ -6,26 +6,26 @@ import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
 import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 
 public final class DocumentedDependencyView {
-    private final DocumentedDependency documentedDependency;
+    private final DocumentedDependency delegate;
     public final boolean isDocumentedClass;
     public final boolean isInherited;
 
-    DocumentedDependencyView(DocumentedDependency documentedDependency, boolean isDocumentedClass,
+    DocumentedDependencyView(DocumentedDependency delegate, boolean isDocumentedClass,
                              boolean isInherited) {
-        this.documentedDependency = documentedDependency;
+        this.delegate = delegate;
         this.isDocumentedClass = isDocumentedClass;
         this.isInherited = isInherited;
     }
 
     public TypeName type() {
-        return documentedDependency.type;
+        return delegate.type;
     }
 
     public DocumentedAnnotations documentedAnnotations() {
-        return documentedDependency.documentedAnnotations;
+        return delegate.documentedAnnotations;
     }
 
     public Javadoc javadoc() {
-        return documentedDependency.javadoc;
+        return delegate.javadoc;
     }
 }

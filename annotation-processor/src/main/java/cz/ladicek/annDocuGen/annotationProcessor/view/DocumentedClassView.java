@@ -13,15 +13,15 @@ import java.util.List;
 import java.util.Set;
 
 public final class DocumentedClassView {
-    private final DocumentedClass documentedClass;
+    private final DocumentedClass delegate;
     public final List<DocumentedPropertyView> properties = new ArrayList<DocumentedPropertyView>();
     public final List<DocumentedDependencyView> dependencies = new ArrayList<DocumentedDependencyView>();
 
-    DocumentedClassView(DocumentedClass documentedClass, Set<TypeName> allDocumentedClasses,
+    DocumentedClassView(DocumentedClass delegate, Set<TypeName> allDocumentedClasses,
                         List<DocumentedClass> inheritanceChain) {
-        this.documentedClass = documentedClass;
+        this.delegate = delegate;
         for (DocumentedClass clazz : inheritanceChain) {
-            boolean isInherited = !documentedClass.fullName.equals(clazz.fullName);
+            boolean isInherited = !delegate.fullName.equals(clazz.fullName);
             for (DocumentedProperty property : clazz.properties) {
                 properties.add(new DocumentedPropertyView(property, isInherited));
             }
@@ -33,23 +33,23 @@ public final class DocumentedClassView {
     }
 
     public String simpleName() {
-        return documentedClass.simpleName;
+        return delegate.simpleName;
     }
 
     public TypeName fullName() {
-        return documentedClass.fullName;
+        return delegate.fullName;
     }
 
     public DocumentedAnnotations documentedAnnotations() {
-        return documentedClass.documentedAnnotations;
+        return delegate.documentedAnnotations;
     }
 
     public boolean isUnit() {
-        return documentedClass.isUnit;
+        return delegate.isUnit;
     }
 
     public Javadoc javadoc() {
-        return documentedClass.javadoc;
+        return delegate.javadoc;
     }
 
     // ---

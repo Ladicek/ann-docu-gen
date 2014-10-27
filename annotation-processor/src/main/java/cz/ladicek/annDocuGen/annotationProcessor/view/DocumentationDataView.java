@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 public final class DocumentationDataView {
-    private final List<DocumentedClassView> documentedClassViews;
+    private final List<DocumentedClassView> documentedClasses;
 
     public DocumentationDataView(DocumentationData documentationData) {
         Set<TypeName> allVisibleDocumentedClasses = new HashSet<TypeName>();
@@ -37,11 +37,11 @@ public final class DocumentationDataView {
             }
         }
 
-        this.documentedClassViews = new ArrayList<DocumentedClassView>();
+        this.documentedClasses = new ArrayList<DocumentedClassView>();
         for (DocumentedClass documentedClass : documentationData.documentedClasses()) {
             if (visibleInDocumentation(documentedClass)) {
                 List<DocumentedClass> inheritanceChain = Lists.reverse(inheritanceChains.get(documentedClass.fullName));
-                documentedClassViews.add(new DocumentedClassView(documentedClass, allVisibleDocumentedClasses,
+                documentedClasses.add(new DocumentedClassView(documentedClass, allVisibleDocumentedClasses,
                         inheritanceChain));
             }
         }
@@ -52,6 +52,6 @@ public final class DocumentationDataView {
     }
 
     public List<DocumentedClassView> documentedClasses() {
-        return documentedClassViews;
+        return documentedClasses;
     }
 }
