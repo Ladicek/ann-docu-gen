@@ -33,6 +33,7 @@
         <version.org.apache.maven.maven-core>3.2.3</version.org.apache.maven.maven-core>
         <version.org.apache.maven.plugins.maven-compiler-plugin>3.2</version.org.apache.maven.plugins.maven-compiler-plugin>
         <version.org.apache.maven.plugins.maven-plugin-plugin>3.3</version.org.apache.maven.plugins.maven-plugin-plugin>
+        <version.org.apache.maven.shared.maven-shared-utils>0.7</version.org.apache.maven.shared.maven-shared-utils>
         <version.org.codehaus.plexus.plexus-archiver>2.8</version.org.codehaus.plexus.plexus-archiver>
         <version.org.jsoup>1.7.3</version.org.jsoup>
     </properties>
@@ -128,6 +129,11 @@
                 <version>${version.org.apache.maven.plugins.maven-plugin-plugin}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-shared-utils</artifactId>
+                <version>${version.org.apache.maven.shared.maven-shared-utils}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.plexus</groupId>
                 <artifactId>plexus-archiver</artifactId>
                 <version>${version.org.codehaus.plexus.plexus-archiver}</version>
@@ -159,6 +165,7 @@
                             <id>ann-docu-gen</id>
                             <goals>
                                 <goal>jar</goal>
+                                <goal>resources</goal>
                             </goals>
                         </execution>
                     </executions>
