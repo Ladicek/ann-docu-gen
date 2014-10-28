@@ -13,6 +13,7 @@
         <module>annotation-processor</module>
         <module>example</module>
         <module>example2</module>
+        <module>examples-dist</module>
         <module>framework</module>
         <module>maven-plugin</module>
     </modules>
@@ -31,6 +32,7 @@
         <version.javax.inject>1</version.javax.inject>
         <version.org.apache.maven.maven-archiver>2.5</version.org.apache.maven.maven-archiver>
         <version.org.apache.maven.maven-core>3.2.3</version.org.apache.maven.maven-core>
+        <version.org.apache.maven.plugins.maven-assembly-plugin>2.5</version.org.apache.maven.plugins.maven-assembly-plugin>
         <version.org.apache.maven.plugins.maven-compiler-plugin>3.2</version.org.apache.maven.plugins.maven-compiler-plugin>
         <version.org.apache.maven.plugins.maven-plugin-plugin>3.3</version.org.apache.maven.plugins.maven-plugin-plugin>
         <version.org.apache.maven.shared.maven-shared-utils>0.7</version.org.apache.maven.shared.maven-shared-utils>
@@ -169,6 +171,11 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${version.org.apache.maven.plugins.maven-assembly-plugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
