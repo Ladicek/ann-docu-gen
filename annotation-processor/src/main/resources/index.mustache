@@ -5,9 +5,6 @@
     <title>{{title}} | AnnDocuGen</title>
     <link rel="stylesheet" href="thirdparty/bootstrap.css">
     <link rel="stylesheet" href="style.css">
-    <script src="thirdparty/jquery.js" defer></script>
-    <script src="thirdparty/typeahead.js" defer></script>
-    <script src="index-search.js" defer></script>
 </head>
 <body>
 <h1>{{title}}</h1>
@@ -45,6 +42,50 @@
 </table>
 
 {{> footer}}
+
+<script src="thirdparty/jquery.js"></script>
+<script src="thirdparty/typeahead.js"></script>
+<script>
+    "use strict";
+
+    $(function() {
+        var search = $("#search");
+
+        var searchData = new Bloodhound({
+            datumTokenizer: function(d) {
+                return d.tokens;
+            },
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            limit: 10,
+            local: {{{searchData}}}
+        });
+
+        searchData.initialize().done(function() {
+            search.prop("disabled", false);
+
+            search.typeahead({
+                highlight: true
+            }, {
+                name: "search",
+                source: searchData.ttAdapter(),
+                displayKey: "name",
+                templates: {
+                    suggestion: function(suggestion) {
+                        return '<p class="search-result-type">' + suggestion.type + '</p>' +
+                                '<p class="search-result-name">' + suggestion.name + '</p>' +
+                                '<p class="search-result-description">' + suggestion.description + '</p>';
+                    }
+                }
+            });
+
+            search.on("typeahead:selected", function(event, suggestion) {
+                window.location.href = suggestion.fqn + ".html";
+            });
+
+            search.focus();
+        });
+    });
+</script>
 
 </body>
 </html>

@@ -11,6 +11,7 @@ import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentationData;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.text.DateFormat;
@@ -39,7 +40,6 @@ public class DocumentationWriter {
 
         copyStaticAsset("thirdparty/jquery.js");
         copyStaticAsset("thirdparty/typeahead.js");
-        copyStaticAsset("index-search.js");
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
         ImmutableMap<String, Object> staticContext = ImmutableMap.<String, Object>builder()
@@ -67,8 +67,6 @@ public class DocumentationWriter {
                 writer.close();
             }
         }
-
-        generateSearchData();
 
         generateData();
     }
@@ -100,23 +98,21 @@ public class DocumentationWriter {
                 .put("title", "Index")
                 .put("units", units)
                 .put("services", services)
+                .put("searchData", generateSearchData())
                 .putAll(staticContext)
                 .build();
         template.execute(out, context);
     }
 
-    private void generateSearchData() throws IOException {
+    private String generateSearchData() {
         List<SearchData> searchData = new ArrayList<SearchData>();
         for (DocumentedClassView documentedClassView : documentationDataView.documentedClasses()) {
             searchData.add(new SearchData(documentedClassView));
         }
 
-        Writer writer = fileCreator.newWriter("search.json");
-        try {
-            gson.toJson(searchData, writer);
-        } finally {
-            writer.close();
-        }
+        StringWriter writer = new StringWriter();
+        gson.toJson(searchData, writer);
+        return writer.getBuffer().toString();
     }
 
     private void generateData() throws IOException {

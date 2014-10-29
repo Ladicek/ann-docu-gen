@@ -19,10 +19,11 @@ public final class SearchData {
         this.type = documentedClassView.isUnit() ? "Unit" : "Service";
         this.description = Jsoup.clean(documentedClassView.javadoc().firstSentence(), Whitelist.none());
         this.fqn = documentedClassView.fullName().toString();
+        String data = name + " " + type + " " + Jsoup.clean(documentedClassView.javadoc().toString(), Whitelist.none());
         this.tokens = Splitter
                 .on(CharMatcher.JAVA_LETTER_OR_DIGIT.or(CharMatcher.is('\'')).negate()) // "'" is common in English
                 .trimResults()
                 .omitEmptyStrings()
-                .splitToList(name + " " + Jsoup.clean(documentedClassView.javadoc().toString(), Whitelist.none()));
+                .splitToList(data);
     }
 }
