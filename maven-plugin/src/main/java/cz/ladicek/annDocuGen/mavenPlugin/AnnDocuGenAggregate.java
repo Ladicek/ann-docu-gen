@@ -7,12 +7,14 @@ import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 import cz.ladicek.annDocuGen.annotationProcessor.view.DocumentationWriter;
 import cz.ladicek.annDocuGen.annotationProcessor.view.FileCreator;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.artifact.filter.PatternIncludesArtifactFilter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,6 +42,22 @@ public class AnnDocuGenAggregate extends AbstractAnnDocuGenMojo {
             defaultValue = "${project.build.directory}/annDocuGen", required = true)
     protected File aggregateDirectory;
 
+    /**
+     * A list of dependency patterns for artifacts that will always be included. If such artifact doesn't contain
+     * AnnDocuGen output, it will be treated as an error.
+     */
+    @Parameter
+    private List<String> includes;
+
+    /**
+     * A list of dependency patterns for artifacts that will always be excluded, even if they contain AnnDocuGen output.
+     */
+    @Parameter
+    private List<String> excludes;
+
+    private ArtifactFilter includesFilter;
+    private ArtifactFilter excludesFilter;
+
     public void execute() throws MojoExecutionException {
         if (skip) {
             getLog().info("Skipping AnnDocuGen aggregation");
@@ -47,24 +65,55 @@ public class AnnDocuGenAggregate extends AbstractAnnDocuGenMojo {
         }
 
         try {
-            DocumentationData data = aggregate(collectDocumentationData());
+            setUpFilters();
+            List<DocumentationData> allDocumentationData = collectDocumentationData();
+            DocumentationData data = aggregate(allDocumentationData);
             FileCreator fileCreator = new MavenPluginFileCreator(aggregateDirectory);
             new DocumentationWriter(data, fileCreator).write();
         } catch (IOException e) {
             failOnError("IOException: Error while creating aggregate", e);
+        } catch (AnnDocuGenMissingException e) {
+            failOnError("AnnDocuGen missing", e);
         }
     }
 
-    private List<DocumentationData> collectDocumentationData() throws IOException {
+    private void setUpFilters() {
+        if (includes != null && !includes.isEmpty()) {
+            includesFilter = new PatternIncludesArtifactFilter(includes);
+        }
+
+        if (excludes != null && !excludes.isEmpty()) {
+            // this is in fact correct, as I need to test if an artifact was _included_ in the "exclusion set"
+            excludesFilter = new PatternIncludesArtifactFilter(excludes);
+        }
+    }
+
+    private List<DocumentationData> collectDocumentationData() throws IOException, AnnDocuGenMissingException {
         List<DocumentationData> result = new ArrayList<DocumentationData>();
         for (Artifact artifact : project.getDependencyArtifacts()) {
+            boolean includedExplicitly = includesFilter != null && includesFilter.include(artifact);
+            boolean excludedExplicitly = excludesFilter != null && excludesFilter.include(artifact);
+
+            if (excludedExplicitly) {
+                getLog().info("Artifact " + artifact.getGroupId() + ":" + artifact.getArtifactId()
+                        + ":" + artifact.getVersion() + " excluded");
+                continue;
+            }
+
             if ("jar".equals(artifact.getType())) {
                 File artifactFile = artifact.getFile();
                 if (artifactFile != null) {
                     DocumentationData documentationData = readDocumentationDataFromArtifactFile(artifactFile);
+
+                    if (includedExplicitly && documentationData == null) {
+                        throw new AnnDocuGenMissingException("Artifact " + artifact.getGroupId() + ":"
+                                + artifact.getArtifactId() + ":" + artifact.getVersion()
+                                + " doesn't contain AnnDocuGen output, but it was included explicitly");
+                    }
+
                     if (documentationData != null) {
-                        getLog().info("Adding " + artifact.getGroupId() + ":" + artifact.getArtifactId()
-                                + " to AnnDocuGen aggregate");
+                        getLog().info("Artifact " + artifact.getGroupId() + ":" + artifact.getArtifactId()
+                                + ":" + artifact.getVersion() + " included");
                         result.add(documentationData);
                     }
                 }
