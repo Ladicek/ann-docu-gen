@@ -6,13 +6,16 @@ import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentationData;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedDependency;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedOutputProperty;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedProperty;
 import cz.ladicek.annDocuGen.annotationProcessor.model.EncounteredClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.FieldInitializer;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
+import cz.ladicek.annDocuGen.annotationProcessor.model.OutputProperties;
 import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
 import cz.ladicek.annDocuGen.annotationProcessor.view.DocumentationWriter;
 import cz.ladicek.annDocuGen.annotationProcessor.view.FileCreator;
+import cz.ladicek.annDocuGen.api.OutputProperty;
 import cz.ladicek.annDocuGen.api.Property;
 import cz.ladicek.annDocuGen.api.Unit;
 
@@ -39,6 +42,7 @@ public final class Documentation {
     private final TypeMirror unitType;
     private final TypeMirror objectType;
     private final CompilerBridge compilerBridge;
+    private final OutputProperties outputProperties;
     private final Map<TypeName, DocumentedClass> classes = new HashMap<TypeName, DocumentedClass>();
     private final Set<EncounteredClass> encounteredClasses = new HashSet<EncounteredClass>();
 
@@ -49,6 +53,7 @@ public final class Documentation {
         this.unitType = processingEnv.getElementUtils().getTypeElement(Unit.class.getName()).asType();
         this.objectType = processingEnv.getElementUtils().getTypeElement(Object.class.getName()).asType();
         this.compilerBridge = CompilerBridge.Factory.create(processingEnv);
+        this.outputProperties = new OutputProperties(processingEnv);
     }
 
     public DocumentedClass documentClass(Element clazz) {
@@ -123,6 +128,19 @@ public final class Documentation {
         boolean mandatory = !initializer.exists();
         Javadoc javadoc = new Javadoc(processingEnv, field);
         return new DocumentedProperty(name, type, initializer, mandatory, javadoc);
+    }
+
+    public DocumentedOutputProperty documentOutputProperty(Element field) {
+        Optional<TypeMirror> outputPropertyType = outputProperties.typeOf(field);
+        if (!outputPropertyType.isPresent()) {
+            // this method should be only called when valid, so no need to care much about error handling
+            throw new IllegalArgumentException("Type of @OutputProperty field " + field + " is not Output<T>");
+        }
+
+        String name = field.getAnnotation(OutputProperty.class).value();
+        TypeName type = new TypeName(processingEnv.getTypeUtils().asElement(outputPropertyType.get()));
+        Javadoc javadoc = new Javadoc(processingEnv, field);
+        return new DocumentedOutputProperty(name, type, javadoc);
     }
 
     public void processEncounteredDependencies() {

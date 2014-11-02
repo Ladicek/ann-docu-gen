@@ -18,6 +18,7 @@ public final class DocumentedClass {
     public final Javadoc javadoc;
 
     public final List<DocumentedProperty> properties = new ArrayList<DocumentedProperty>();
+    public final List<DocumentedOutputProperty> outputProperties = new ArrayList<DocumentedOutputProperty>();
     public final List<DocumentedDependency> dependencies = new ArrayList<DocumentedDependency>();
 
     public DocumentedClass(boolean isPublic, boolean isAbstract, String simpleName, TypeName fullName,
@@ -35,6 +36,10 @@ public final class DocumentedClass {
 
     public void addProperty(DocumentedProperty property) {
         properties.add(property);
+    }
+
+    public void addOutputProperty(DocumentedOutputProperty outputProperty) {
+        outputProperties.add(outputProperty);
     }
 
     public void addDependency(DocumentedDependency dependency) {

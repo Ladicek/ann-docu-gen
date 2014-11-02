@@ -3,6 +3,7 @@ package cz.ladicek.annDocuGen.annotationProcessor.view;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedAnnotations;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedClass;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedDependency;
+import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedOutputProperty;
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedProperty;
 import cz.ladicek.annDocuGen.annotationProcessor.model.Javadoc;
 import cz.ladicek.annDocuGen.annotationProcessor.model.TypeName;
@@ -15,6 +16,7 @@ import java.util.Set;
 public final class DocumentedClassView {
     private final DocumentedClass delegate;
     public final List<DocumentedPropertyView> properties = new ArrayList<DocumentedPropertyView>();
+    public final List<DocumentedOutputPropertyView> outputProperties = new ArrayList<DocumentedOutputPropertyView>();
     public final List<DocumentedDependencyView> dependencies = new ArrayList<DocumentedDependencyView>();
 
     DocumentedClassView(DocumentedClass delegate, Set<TypeName> allDocumentedClasses,
@@ -24,6 +26,9 @@ public final class DocumentedClassView {
             boolean isInherited = !delegate.fullName.equals(clazz.fullName);
             for (DocumentedProperty property : clazz.properties) {
                 properties.add(new DocumentedPropertyView(property, isInherited));
+            }
+            for (DocumentedOutputProperty outputProperty : clazz.outputProperties) {
+                outputProperties.add(new DocumentedOutputPropertyView(outputProperty, isInherited));
             }
             for (DocumentedDependency dependency : clazz.dependencies) {
                 boolean isDocumented = allDocumentedClasses.contains(dependency.type);

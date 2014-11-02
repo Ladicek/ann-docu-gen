@@ -35,6 +35,21 @@
     {{/javadoc.exists}}
 {{/properties}}
 
+<h2>Output Properties</h2>
+
+{{^outputProperties}}
+    <p><em>None</em></p>
+{{/outputProperties}}
+{{#outputProperties}}
+    <p class="lead">
+        <strong>{{name}}</strong>: <code>{{type.simpleName}}</code>
+        {{#isInherited}}<span class="label label-default">Inherited</span>{{/isInherited}}
+    </p>
+    {{#javadoc.exists}}
+        <div class="well well-sm">{{{javadoc}}}</div>
+    {{/javadoc.exists}}
+{{/outputProperties}}
+
 <h2>Dependencies</h2>
 
 {{^dependencies}}

@@ -1,6 +1,8 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
 import cz.ladicek.annDocuGen.annotationProcessor.model.DocumentedClass;
+import cz.ladicek.annDocuGen.annotationProcessor.model.OutputProperties;
+import cz.ladicek.annDocuGen.api.OutputProperty;
 import cz.ladicek.annDocuGen.api.Property;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -21,14 +23,17 @@ import java.util.Set;
 import static cz.ladicek.annDocuGen.annotationProcessor.Elements.declaringClassOf;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes({"javax.inject.Inject", "cz.ladicek.annDocuGen.api.Property"})
+@SupportedAnnotationTypes({"javax.inject.Inject", "cz.ladicek.annDocuGen.api.Property",
+        "cz.ladicek.annDocuGen.api.OutputProperty"})
 public class DocumentationGenerator extends AbstractProcessor {
     private Documentation doc;
+    private OutputProperties outputProperties;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.doc = new Documentation(processingEnv);
+        this.outputProperties = new OutputProperties(processingEnv);
     }
 
     @Override
@@ -65,6 +70,7 @@ public class DocumentationGenerator extends AbstractProcessor {
         encounterRootClasses(roundEnv, doc);
         collectDocumentationForDependencies(roundEnv, doc);
         collectDocumentationForProperties(roundEnv, doc);
+        collectDocumentationForOutputProperties(roundEnv, doc);
     }
 
     private void encounterRootClasses(RoundEnvironment roundEnv, Documentation doc) {
@@ -81,6 +87,12 @@ public class DocumentationGenerator extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
                         "@Inject @Property is invalid. Use @Inject for dependencies and @Property for properties.",
                         annotated);
+                continue;
+            }
+            if (annotated.getAnnotation(OutputProperty.class) != null) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                        "@Inject @OutputProperty is invalid. Use @Inject for dependencies and @OutputProperty"
+                                + " for output properties.", annotated);
                 continue;
             }
 
@@ -112,6 +124,12 @@ public class DocumentationGenerator extends AbstractProcessor {
                 // warning is printed out in collectDocumentationForDependencies, no need to do it here too
                 continue;
             }
+            if (annotated.getAnnotation(OutputProperty.class) != null) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                        "@Property @OutputProperty is invalid. Use @Property for input properties"
+                                + " and @OutputProperty for output properties.", annotated);
+                continue;
+            }
 
             Element clazz = declaringClassOf(annotated);
             DocumentedClass type = doc.documentClass(clazz);
@@ -123,6 +141,36 @@ public class DocumentationGenerator extends AbstractProcessor {
             }
 
             type.addProperty(doc.documentProperty(annotated));
+        }
+    }
+
+    private void collectDocumentationForOutputProperties(RoundEnvironment roundEnv, Documentation doc) {
+        for (Element annotated : roundEnv.getElementsAnnotatedWith(OutputProperty.class)) {
+            if (annotated.getAnnotation(Inject.class) != null) {
+                // warning is printed out in collectDocumentationForDependencies, no need to do it here too
+                continue;
+            }
+            if (annotated.getAnnotation(Property.class) != null) {
+                // warning is printed out in collectDocumentationForProperties, no need to do it here too
+                continue;
+            }
+
+            Element clazz = declaringClassOf(annotated);
+            DocumentedClass type = doc.documentClass(clazz);
+
+            if (annotated.getKind() != ElementKind.FIELD) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                        "@OutputProperty is only supported for fields", annotated);
+                continue;
+            }
+
+            if (!outputProperties.typeOf(annotated).isPresent()) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+                        "@OutputProperty field must be of type Output<T>", annotated);
+                continue;
+            }
+
+            type.addOutputProperty(doc.documentOutputProperty(annotated));
         }
     }
 }

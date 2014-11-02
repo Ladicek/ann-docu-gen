@@ -1,8 +1,11 @@
 package cz.ladicek.annDocuGen.annotationProcessor;
 
+import cz.ladicek.annDocuGen.annotationProcessor.model.OutputProperties;
+import cz.ladicek.annDocuGen.api.OutputProperty;
 import cz.ladicek.annDocuGen.api.Property;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -17,8 +20,16 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes("cz.ladicek.annDocuGen.api.Property")
+@SupportedAnnotationTypes({"cz.ladicek.annDocuGen.api.Property", "cz.ladicek.annDocuGen.api.OutputProperty"})
 public class StaticChecker extends AbstractProcessor {
+    private OutputProperties outputProperties;
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        this.outputProperties = new OutputProperties(processingEnv);
+    }
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
@@ -32,7 +43,11 @@ public class StaticChecker extends AbstractProcessor {
 
     private boolean doProcess(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element annotated : roundEnv.getElementsAnnotatedWith(Property.class)) {
-            check(annotated);
+            checkProperty(annotated);
+        }
+
+        for (Element annotated : roundEnv.getElementsAnnotatedWith(OutputProperty.class)) {
+            checkOutputProperty(annotated);
         }
 
         return false;
@@ -40,7 +55,7 @@ public class StaticChecker extends AbstractProcessor {
 
     private static final Pattern PROPERTY_NAME = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_.-]*");
 
-    private void check(Element annotated) {
+    private void checkProperty(Element annotated) {
         if (annotated.getKind() != ElementKind.FIELD) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "@Property can only be applied to fields",
                     annotated);
@@ -51,10 +66,38 @@ public class StaticChecker extends AbstractProcessor {
                     annotated);
         }
 
+        if (annotated.getAnnotation(OutputProperty.class) != null) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@Property can't be combined with @OutputProperty", annotated);
+        }
+
         Property property = annotated.getAnnotation(Property.class);
         if (!PROPERTY_NAME.matcher(property.value()).matches()) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "@Property name must be " + PROPERTY_NAME,
                     annotated);
+        }
+    }
+
+    private void checkOutputProperty(Element annotated) {
+        if (annotated.getKind() != ElementKind.FIELD) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@OutputProperty can only be applied to fields", annotated);
+        }
+
+        if (annotated.getAnnotation(Inject.class) != null) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@OutputProperty can't be combined with @Inject", annotated);
+        }
+
+        OutputProperty property = annotated.getAnnotation(OutputProperty.class);
+        if (!PROPERTY_NAME.matcher(property.value()).matches()) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@OutputProperty name must be " + PROPERTY_NAME, annotated);
+        }
+
+        if (annotated.getKind() == ElementKind.FIELD && !outputProperties.typeOf(annotated).isPresent()) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@OutputProperty field must be of type Output<T>", annotated);
         }
     }
 }

@@ -2,6 +2,8 @@ package cz.ladicek.annDocuGen.example;
 
 import com.google.common.base.Optional;
 import cz.ladicek.annDocuGen.api.EnvironmentVariables;
+import cz.ladicek.annDocuGen.api.Output;
+import cz.ladicek.annDocuGen.api.OutputProperty;
 import cz.ladicek.annDocuGen.api.Property;
 import cz.ladicek.annDocuGen.api.TheAnswer;
 import cz.ladicek.annDocuGen.api.Unit;
@@ -51,6 +53,10 @@ public class ExampleUnit implements Unit {
     /** A property that is initialized to {@code null} explicitly. It should be treated like non-initialized. */
     @Property("my.property.initialized.to.null")
     private String myPropertyInitializedToNull = null;
+
+    /** An output property. */
+    @OutputProperty("my.output.property")
+    private Output<String> myOutputProperty;
 
     @Inject
     public ExampleUnit(Baz baz, SimpleService simpleService, @EnvironmentVariables Map<String, String> environment) {

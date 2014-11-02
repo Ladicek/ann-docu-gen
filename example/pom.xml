@@ -20,7 +20,6 @@
         <dependency>
             <groupId>cz.ladicek.annDocuGen</groupId>
             <artifactId>ann-docu-gen-annotation-processor</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>cz.ladicek.annDocuGen</groupId>
